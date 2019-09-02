@@ -10,8 +10,6 @@ namespace SHENZENSolitaire
     {
         static void Main(string[] args)
         {
-            Solitaire sol = new Solitaire();
-
         }
     }
 }
