@@ -2,11 +2,11 @@
 {
     public enum SuitEnum : byte
     {
+        EMPTY,
+        BLOCKED,
+        ROSE,
         RED,
         GREEN,
-        BLACK,
-        ROSE,
-        EMPTY,
-        BLOCKED
+        BLACK
     }
 }

@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SHENZENSolitaire
 {
@@ -11,12 +13,10 @@ namespace SHENZENSolitaire
             Field = field;
         }
 
-        public List<Turn> FindAllPossibleTurns(PlayingField field)
+        public static List<Turn> FindAllPossibleTurns(PlayingField field)
         {
             List<Turn> turns = new List<Turn>();
             List<Turn> bufferTurns = new List<Turn>();
-
-
 
             #region [FROM BUFFER]
             for (byte i = 0; i < PlayingField.COLUMNS_BUFFER; i++)
@@ -43,6 +43,14 @@ namespace SHENZENSolitaire
                         turns.Add(turn);
                     }
                 }
+            }
+            #endregion
+
+            #region [DRAGONS]
+            SuitEnum[] mergableDragons = field.FindMergableDragons();
+            foreach (SuitEnum suit in mergableDragons)
+            {
+                turns.Add(new Turn { MergeDragons = suit });
             }
             #endregion
 
@@ -88,20 +96,58 @@ namespace SHENZENSolitaire
                         if (field.IsTurnAllowed(turn))
                         {
                             bufferTurns.Add(turn);
+                            break;
                         }
                     }
                     #endregion
                 }
-            } 
+            }
             #endregion
 
             turns.AddRange(bufferTurns);
             return turns;
         }
 
+        private List<GameState> EvaluateState(PlayingField field, List<GameState> path)
+        {
+            if (path.Count < 4000)
+            {
+                List<Turn> turns = FindAllPossibleTurns(field);
+                GameState newState = new GameState();
+                if (turns.Count == 0 && field.IsGameOver())
+                {
+                    newState.Fingerprints = path.Last().Fingerprints;
+                    newState.PrecedingTurn = new Turn { Finished = true };
+                    path.Add(newState);
+                }
+                else
+                {
+                    foreach (Turn t in turns)
+                    {
+                        newState.PrecedingTurn = t;
+                        PlayingField newField = field.PerformTurn(t);
+                        newState.Fingerprints = newField.MakeFingerprints();
+
+                        if(!newState.HasEquivaltentStack(path))
+                        {
+                            List<GameState> newPath = new List<GameState>(path) { newState };
+                            newPath = EvaluateState(newField, newPath);
+                            if (newPath.Count > path.Count + 1)
+                            {
+                                path = newPath;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            return path;
+        }
+
         public void FindSolution()
         {
-            
+            GameState initialGameState = new GameState { Fingerprints = Field.MakeFingerprints(), PrecedingTurn = new Turn() };
+            EvaluateState(Field, new List<GameState> { initialGameState });
         }
     }
 }

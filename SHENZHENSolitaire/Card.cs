@@ -2,6 +2,12 @@
 {
     public class Card
     {
+        public static readonly Card DRAGON_RED = new Card(suit: SuitEnum.RED);
+        public static readonly Card DRAGON_GREEN = new Card(suit: SuitEnum.GREEN);
+        public static readonly Card DRAGON_BLACK = new Card(suit: SuitEnum.BLACK);
+        public static readonly Card BLOCKED = new Card(suit: SuitEnum.BLOCKED);
+        public static readonly Card EMPTY = new Card(suit: SuitEnum.EMPTY);
+
         /// <summary>
         /// 0 - Dragon
         /// n - Playing Card
@@ -45,5 +51,9 @@
         {
             return new Card((byte)(packedValue & 0b1111), (SuitEnum)(packedValue >> 4));
         }
+
+        public static bool operator ==(Card a, Card b) => a is Card a1 && b is Card b1 && a1.Equals(b1);
+
+        public static bool operator !=(Card a, Card b) => !(a == b);
     }
 }

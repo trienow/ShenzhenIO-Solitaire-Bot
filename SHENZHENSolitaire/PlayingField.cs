@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SHENZENSolitaire
 {
@@ -12,21 +13,22 @@ namespace SHENZENSolitaire
 
         private readonly Card[] topArea = new Card[COLUMNS_TOP];
         private readonly List<Card>[] fieldArea = new List<Card>[COLUMNS_FIELD]; //Array: Column | List: Row
+
         private static readonly Card[] DECK = new Card[]
         {
             new Card(suit: SuitEnum.ROSE),
-            new Card(suit: SuitEnum.RED),
-            new Card(suit: SuitEnum.RED),
-            new Card(suit: SuitEnum.RED),
-            new Card(suit: SuitEnum.RED),
-            new Card(suit: SuitEnum.GREEN),
-            new Card(suit: SuitEnum.GREEN),
-            new Card(suit: SuitEnum.GREEN),
-            new Card(suit: SuitEnum.GREEN),
-            new Card(suit: SuitEnum.BLACK),
-            new Card(suit: SuitEnum.BLACK),
-            new Card(suit: SuitEnum.BLACK),
-            new Card(suit: SuitEnum.BLACK),
+            Card.DRAGON_RED,
+            Card.DRAGON_RED,
+            Card.DRAGON_RED,
+            Card.DRAGON_RED,
+            Card.DRAGON_GREEN,
+            Card.DRAGON_GREEN,
+            Card.DRAGON_GREEN,
+            Card.DRAGON_GREEN,
+            Card.DRAGON_BLACK,
+            Card.DRAGON_BLACK,
+            Card.DRAGON_BLACK,
+            Card.DRAGON_BLACK,
             new Card(1, SuitEnum.RED),
             new Card(2, SuitEnum.RED),
             new Card(3, SuitEnum.RED),
@@ -55,15 +57,15 @@ namespace SHENZENSolitaire
             new Card(8, SuitEnum.BLACK),
             new Card(9, SuitEnum.BLACK),
         };
-        public static readonly Card[] DECK_BUFFER;
+        private static readonly Card[] DECK_BUFFER;
 
         static PlayingField()
         {
             int deckLen = DECK.Length;
             DECK_BUFFER = new Card[deckLen + 2];
-            DECK_BUFFER[0] = new Card(suit: SuitEnum.BLOCKED);
+            DECK_BUFFER[0] = Card.BLOCKED;
             Array.Copy(DECK, 0, DECK_BUFFER, 0, deckLen);
-            DECK_BUFFER[deckLen + 1] = new Card(suit: SuitEnum.EMPTY);
+            DECK_BUFFER[deckLen + 1] = Card.EMPTY;
         }
 
         /// <summary>
@@ -73,7 +75,7 @@ namespace SHENZENSolitaire
         /// <returns>The card in the specified slot</returns>
         public Card this[int col]
         {
-            get => topArea[col];
+            get => this.topArea[col];
         }
 
         /// <summary>
@@ -84,7 +86,7 @@ namespace SHENZENSolitaire
         /// <returns>The card object</returns>
         public Card this[int col, int row]
         {
-            get => fieldArea[col][row];
+            get => this.fieldArea[col][row];
         }
 
         /// <summary>
@@ -92,7 +94,7 @@ namespace SHENZENSolitaire
         /// </summary>
         /// <param name="col">The column of the playing field to the stack size from</param>
         /// <returns>The card count of the stack</returns>
-        public int GetColumnLength(byte col) => fieldArea[col].Count;
+        public int GetColumnLength(byte col) => this.fieldArea[col].Count;
 
         /// <summary>
         /// Inits a new empty playing field
@@ -101,12 +103,12 @@ namespace SHENZENSolitaire
         {
             for (int i = 0; i < COLUMNS_TOP; i++)
             {
-                topArea[i] = new Card();
+                this.topArea[i] = new Card();
             }
 
             for (int i = 0; i < COLUMNS_FIELD; i++)
             {
-                fieldArea[i] = new List<Card>(MAX_ROWS_FIELD);
+                this.fieldArea[i] = new List<Card>(MAX_ROWS_FIELD);
             }
         }
 
@@ -139,7 +141,7 @@ namespace SHENZENSolitaire
             int f = 0;
             for (; f < COLUMNS_TOP; f++)
             {
-                topArea[f] = Card.Unpack(fingerprint[f]);
+                this.topArea[f] = Card.Unpack(fingerprint[f]);
             }
 
             int col = 0;
@@ -154,7 +156,7 @@ namespace SHENZENSolitaire
                     continue;
                 }
 
-                fieldArea[col].Add(Card.Unpack(fingerprint[f]));
+                this.fieldArea[col].Add(Card.Unpack(fingerprint[f]));
             }
         }
 
@@ -171,7 +173,7 @@ namespace SHENZENSolitaire
                 for (int j = 0; j < 5; j++)
                 {
                     int nextCardIndex = rnd.Next(deck.Count);
-                    fieldArea[i].Add(DECK[nextCardIndex]);
+                    this.fieldArea[i].Add(DECK[nextCardIndex]);
                     deck.RemoveAt(nextCardIndex);
                 }
             }
@@ -187,11 +189,11 @@ namespace SHENZENSolitaire
         {
             if (topSlots)
             {
-                topArea[column] = card;
+                this.topArea[column] = card;
             }
             else
             {
-                fieldArea[column].Add(card);
+                this.fieldArea[column].Add(card);
             }
         }
 
@@ -203,19 +205,19 @@ namespace SHENZENSolitaire
         /// <returns>Returns true, when the card is grabbable</returns>
         public bool IsMovable(int column, int row)
         {
-            int cardCount = fieldArea[column].Count; //<- Column length
+            int cardCount = this.fieldArea[column].Count; //<- Column length
             bool result = true;
 
             //If the requested card is the last card
             if (row + 1 < cardCount)
             {
-                Card lastCard = fieldArea[column][row];
+                Card lastCard = this.fieldArea[column][row];
                 if (lastCard.Value > 0)
                 {
                     //If it isn't and it is not a dragon, go through the stack
                     for (int i = row + 1; i < cardCount; i++)
                     {
-                        Card thisCard = fieldArea[column][i];
+                        Card thisCard = this.fieldArea[column][i];
 
                         if (thisCard.Value == 0 || thisCard.Suit == lastCard.Suit || thisCard.Value + 1 != lastCard.Value)
                         {
@@ -243,37 +245,51 @@ namespace SHENZENSolitaire
         /// <returns>True, when the turn is allows by the rules</returns>
         public bool IsTurnAllowed(Turn turn)
         {
-            byte toCol = turn.ToColumn;
-            byte fromCol = turn.FromColumn;
-
-            Card fromCard = turn.FromTop ? this.topArea[fromCol] : this.fieldArea[fromCol][this.GetColumnLength(fromCol) - 1];
-            int destinationColumnLength = this.fieldArea[toCol].Count;
             bool allowed = true; //<- Let's start off allowing everything and going from there
 
-            allowed = fromCard.Suit != SuitEnum.BLOCKED && fromCard.Suit != SuitEnum.EMPTY; //<- If it is not a system-suit
-            allowed = turn.FromTop && fromCol < 3 || this.IsMovable(fromCol, turn.FromRow); //<- If it is movable at all
-
-            if (allowed && turn.ToTop)
+            if (turn.MergeDragons == default(SuitEnum))
             {
-                allowed = allowed && (turn.FromTop || turn.FromRow == destinationColumnLength - 1); //<- Only one card may go to the top
+                byte toCol = turn.ToColumn;
+                byte fromCol = turn.FromColumn;
 
-                allowed = allowed && !(toCol == 4 && fromCard.Suit != SuitEnum.RED); //<- The first output should be red
-                allowed = allowed && !(toCol == 5 && fromCard.Suit != SuitEnum.BLACK); //<- The second output should be black
-                allowed = allowed && !(toCol == 6 && fromCard.Suit != SuitEnum.GREEN); //<- The third output should be green
-
-                allowed = allowed && !(turn.FromTop && fromCol < 3 && toCol < 3); //<- Buffer swapping should not be permitted
-                allowed = allowed && toCol < 4 && this.topArea[toCol].Suit == SuitEnum.EMPTY; //<- The first four slots must be empty
-                allowed = allowed && !(toCol == 3 && fromCard.Suit != SuitEnum.ROSE); //<- The fourth slot also requires the from card to be a rose
-            }
-
-            if (allowed && !turn.ToTop && destinationColumnLength > 0)
-            {
+                Card fromCard = turn.FromTop ? this.topArea[fromCol] : this.fieldArea[fromCol][turn.FromRow];
                 int cardBunch = this.fieldArea[fromCol].Count - turn.FromRow;
-                allowed = allowed && destinationColumnLength + cardBunch < MAX_ROWS_FIELD; //<- If the destination column is not already full
 
-                //If the destination column can accept the card at all
-                Card toCard = this.fieldArea[toCol][destinationColumnLength - 1];
-                allowed = fromCard.Value + 1 == toCard.Value && fromCard.Suit != toCard.Suit;
+                allowed = fromCard.Suit != SuitEnum.BLOCKED && fromCard.Suit != SuitEnum.EMPTY; //<- If it is not a system-suit
+                allowed = turn.FromTop && fromCol < 3 || this.IsMovable(fromCol, turn.FromRow); //<- If it is movable at all
+
+                if (allowed && turn.ToTop)
+                {
+                    allowed = turn.FromTop || cardBunch == 1; //<- Only one card may go to the top
+                    allowed = allowed && !(toCol > 3 && fromCard.Value - 1 != topArea[toCol].Value); //<- Output slots should only allow rising values
+
+                    switch (toCol)
+                    {
+                        case 4: allowed = allowed && fromCard.Suit == SuitEnum.RED; break; //<- The first output should be red
+                        case 5: allowed = allowed && fromCard.Suit == SuitEnum.BLACK; break; //<- The second output should be black
+                        case 6: allowed = allowed && fromCard.Suit == SuitEnum.GREEN; break; //<- The third output should be green
+                    }
+
+                    allowed = allowed && !(turn.FromTop && fromCol < 3 && toCol < 3); //<- Buffer swapping should not be permitted
+                    allowed = allowed && !(toCol < 4 && this.topArea[toCol].Suit != SuitEnum.EMPTY); //<- The first four slots must be empty
+                    allowed = allowed && !(toCol == 3 && fromCard.Suit != SuitEnum.ROSE); //<- The fourth slot also requires the from card to be a rose
+                }
+
+                int destinationColumnLength = this.fieldArea[toCol].Count;
+                if (allowed && !turn.ToTop && destinationColumnLength > 0)
+                {
+                    allowed = destinationColumnLength + cardBunch < MAX_ROWS_FIELD; //<- If the destination column is not already full
+                    
+                    allowed = allowed && fromCard.Value != 0; //<- Stacking Dragons onto anything is not allowed
+                    
+                    //If the destination column can accept the card at all
+                    Card toCard = this.fieldArea[toCol][destinationColumnLength - 1];
+                    allowed = allowed && fromCard.Value + 1 == toCard.Value && fromCard.Suit != toCard.Suit; //<- Rule for stacking numbers
+                }
+            }
+            else
+            {
+                allowed = this.FindMergableDragons().Contains(turn.MergeDragons);
             }
 
             return allowed;
@@ -284,59 +300,84 @@ namespace SHENZENSolitaire
         /// </summary>
         /// <param name="color">The dragon color to search for</param>
         /// <returns><see langword="true"/> when dragons can be merged</returns>
-        public bool CanMergeDragons(SuitEnum color)
+        public SuitEnum[] FindMergableDragons()
         {
-            Card dragonCard = new Card(0, color);
-            int visibleDragons = 0;
-            bool hasEmptyBufferSlot = false;
-            for (int i = 0; i < 3; i++)
+            int globalFreeBufferSlot = 0;
+            int[] coloredFreeBufferSlots = new int[3];
+            int totalFreeBufferSlots = 0;
+            for (byte col = 0; col < COLUMNS_BUFFER; col++)
             {
-                if (topArea[i] == dragonCard)
+                Card c = this.topArea[col];
+                if (c == Card.EMPTY)
                 {
-                    hasEmptyBufferSlot = true;
-                    visibleDragons++;
+                    globalFreeBufferSlot++;
+                    totalFreeBufferSlots++;
                 }
-                else if (!hasEmptyBufferSlot && topArea[i].Suit == SuitEnum.EMPTY)
+                else if (c == Card.DRAGON_RED)
                 {
-                    hasEmptyBufferSlot = true;
+                    coloredFreeBufferSlots[0]++;
+                    totalFreeBufferSlots++;
+                }
+                else if (c == Card.DRAGON_GREEN)
+                {
+                    coloredFreeBufferSlots[1]++;
+                    totalFreeBufferSlots++;
+                }
+                else if (c == Card.DRAGON_BLACK)
+                {
+                    coloredFreeBufferSlots[2]++;
+                    totalFreeBufferSlots++;
                 }
             }
 
-            bool result = false;
-            if (hasEmptyBufferSlot)
+            List<SuitEnum> mergableSuits = new List<SuitEnum>(totalFreeBufferSlots);
+            int[] openDragons = new int[] { coloredFreeBufferSlots[0], coloredFreeBufferSlots[1], coloredFreeBufferSlots[2], };
+            if (totalFreeBufferSlots > 0)
             {
                 for (byte col = 0; col < COLUMNS_FIELD; col++)
                 {
-                    int columnLength = GetColumnLength(col);
-                    for (int row = 0; row < columnLength; row++)
+                    int row = this.GetColumnLength(col) - 1;
+
+                    if (row == -1) continue;
+
+                    if (this.fieldArea[col][row] == Card.DRAGON_RED && this.IsMovable(col, row))
                     {
-                        if (fieldArea[col][row] == dragonCard)
+                        openDragons[0]++;
+                    }
+                    else if (this.fieldArea[col][row] == Card.DRAGON_GREEN && this.IsMovable(col, row))
+                    {
+                        openDragons[1]++;
+                    }
+                    else if (this.fieldArea[col][row] == Card.DRAGON_BLACK && this.IsMovable(col, row))
+                    {
+                        openDragons[2]++;
+                    }
+                }
+
+                //Convert found dragons to their suits
+                for (byte i = 0; i < 3; i++)
+                {
+                    if (openDragons[i] == 4 && (coloredFreeBufferSlots[i] > 0 || globalFreeBufferSlot > 0))
+                    {
+                        globalFreeBufferSlot -= coloredFreeBufferSlots[i] > 0 ? 0 : 1;
+                        switch (i)
                         {
-                            if (IsMovable(col, row))
-                            {
-                                if (++visibleDragons == 4)
-                                {
-                                    result = true;
-                                    goto END;
-                                }
-                            }
-                            else
-                            {
-                                goto END;
-                            }
+                            case 0: mergableSuits.Add(SuitEnum.RED); break;
+                            case 1: mergableSuits.Add(SuitEnum.GREEN); break;
+                            case 2: mergableSuits.Add(SuitEnum.BLACK); break;
                         }
                     }
                 }
             }
 
-        END: return result;
+            return mergableSuits.ToArray();
         }
 
         /// <summary>
         /// Performs an unchecked merge on the field. Check with <see cref="CanMergeDragons(SuitEnum)"/>.
         /// </summary>
         /// <param name="color"></param>
-        public void PerformDragonMerge(SuitEnum color)
+        protected void PerformDragonMerge(SuitEnum color)
         {
             bool hasBlocked = false;
             Card dragonCard = new Card(0, color);
@@ -345,24 +386,24 @@ namespace SHENZENSolitaire
             //Reserve and clear dragons from the top part
             for (int col = 0; col < 3; col++)
             {
-                if (topArea[col] == dragonCard)
+                if (this.topArea[col] == dragonCard)
                 {
                     if (hasBlocked)
                     {
-                        topArea[col] = new Card(0, SuitEnum.EMPTY);
+                        this.topArea[col] = new Card(0, SuitEnum.EMPTY);
                     }
                     else
                     {
-                        topArea[col] = new Card(0, SuitEnum.BLOCKED);
+                        this.topArea[col] = new Card(0, SuitEnum.BLOCKED);
                         hasBlocked = true;
                         dragonsFound++;
                     }
                 }
-                else if (topArea[col].Suit == SuitEnum.EMPTY)
+                else if (this.topArea[col].Suit == SuitEnum.EMPTY)
                 {
                     if (!hasBlocked)
                     {
-                        topArea[col] = new Card(0, SuitEnum.BLOCKED);
+                        this.topArea[col] = new Card(0, SuitEnum.BLOCKED);
                         hasBlocked = true;
                     }
                 }
@@ -371,12 +412,12 @@ namespace SHENZENSolitaire
             //Clear dragons from the field
             for (byte col = 0; col < COLUMNS_FIELD; col++)
             {
-                int columnLength = GetColumnLength(col);
+                int columnLength = this.GetColumnLength(col);
                 for (int row = columnLength - 1; row >= 0; row--)
                 {
-                    if (fieldArea[col][row] == dragonCard)
+                    if (this.fieldArea[col][row] == dragonCard)
                     {
-                        fieldArea[col].RemoveAt(row);
+                        this.fieldArea[col].RemoveAt(row);
                         dragonsFound++;
                     }
                 }
@@ -392,41 +433,51 @@ namespace SHENZENSolitaire
         /// Performs an unchecked turn on the field. Check with <see cref="IsTurnAllowed(Turn)"/>.
         /// </summary>
         /// <param name="turn">The action to perform</param>
-        public void PerformTurn(Turn turn)
+        public PlayingField PerformTurn(Turn turn)
         {
-            int toCol = turn.ToColumn;
-            int fromCol = turn.FromColumn;
+            PlayingField field = new PlayingField(this);
 
-            if (turn.FromTop)
+            if (turn.MergeDragons == default(SuitEnum))
             {
-                if (turn.ToTop)
+                int toCol = turn.ToColumn;
+                int fromCol = turn.FromColumn;
+
+                if (turn.FromTop)
                 {
-                    topArea[toCol] = topArea[fromCol];
+                    if (turn.ToTop)
+                    {
+                        field.topArea[toCol] = field.topArea[fromCol];
+                    }
+                    else
+                    {
+                        field.fieldArea[toCol].Add(field.topArea[fromCol]);
+                        field.topArea[fromCol] = new Card();
+                    }
                 }
                 else
                 {
-                    fieldArea[toCol].Add(topArea[fromCol]);
-                    topArea[fromCol] = new Card();
+                    int fromRow = turn.FromRow;
+                    if (turn.ToTop)
+                    {
+                        field.topArea[toCol] = field.fieldArea[fromCol][fromRow];
+                        field.fieldArea[fromCol].RemoveAt(fromRow);
+                    }
+                    else
+                    {
+                        while (field.fieldArea[fromCol].Count > fromRow)
+                        {
+                            field.fieldArea[toCol].Add(field.fieldArea[fromCol][fromRow]);
+                            field.fieldArea[fromCol].RemoveAt(fromRow);
+                        }
+                    }
                 }
             }
             else
             {
-                int fromRow = turn.FromRow;
-                if (turn.ToTop)
-                {
-                    topArea[toCol] = fieldArea[fromCol][fromRow];
-                }
-                else
-                {
-                    while (fieldArea[fromCol].Count == fromRow)
-                    {
-                        fieldArea[toCol].Add(fieldArea[fromCol][fromRow]);
-                        fieldArea[fromCol].RemoveAt(fromRow);
-                    }
-                }
-
-                fieldArea[fromCol].RemoveAt(fromRow);
+                field.PerformDragonMerge(turn.MergeDragons);
             }
+
+            return field;
         }
 
         /// <summary>
@@ -435,7 +486,7 @@ namespace SHENZENSolitaire
         /// <returns>Returns true, when all output slots have been filled with the right cards</returns>
         public bool IsGameOver()
         {
-            return topArea[3].Suit == SuitEnum.ROSE && topArea[4].Value == 9 && topArea[5].Value == 9 && topArea[6].Value == 9;
+            return this.topArea[3].Suit == SuitEnum.ROSE && this.topArea[4].Value == 9 && this.topArea[5].Value == 9 && this.topArea[6].Value == 9;
         }
 
         /// <summary>
@@ -448,7 +499,7 @@ namespace SHENZENSolitaire
             int length = COLUMNS_TOP + 1 + COLUMNS_FIELD + 1;
             for (byte col = 0; col < COLUMNS_FIELD; col++)
             {
-                length += GetColumnLength(col);
+                length += this.GetColumnLength(col);
             }
 
             byte[] fingerprint = new byte[length];
@@ -459,7 +510,7 @@ namespace SHENZENSolitaire
                 //Fill the array with the buffer area, ignoring different permutations
                 for (byte col = 0; col < COLUMNS_BUFFER; col++)
                 {
-                    if (c == topArea[col])
+                    if (c == this.topArea[col])
                     {
                         fingerprint[f] = c.GetFingerprint();
                         f++;
@@ -480,7 +531,7 @@ namespace SHENZENSolitaire
             //Now transfer the output slots
             for (byte col = COLUMNS_BUFFER; col < COLUMNS_TOP; col++)
             {
-                fingerprint[f] = topArea[col].GetFingerprint();
+                fingerprint[f] = this.topArea[col].GetFingerprint();
                 f++;
             }
 
@@ -488,7 +539,7 @@ namespace SHENZENSolitaire
             fingerprint[f] = 0xFF;
             f++;
 
-            foreach (List<Card> column in fieldArea)
+            foreach (List<Card> column in this.fieldArea)
             {
                 foreach (Card c in column)
                 {
@@ -501,6 +552,29 @@ namespace SHENZENSolitaire
             }
 
             return fingerprint;
+        }
+
+        public byte[][] MakeFingerprints()
+        {
+            byte[][] stacks = new byte[COLUMNS_FIELD + 1][];
+
+            for (byte col = 0; col < COLUMNS_FIELD; col++)
+            {
+                int columnLength = GetColumnLength(col);
+                stacks[col] = new byte[columnLength];
+                for (byte row = 0; row < columnLength; row++)
+                {
+                    stacks[col][row] = fieldArea[col][row].GetFingerprint();
+                }
+            }
+
+            stacks[COLUMNS_FIELD] = new byte[COLUMNS_TOP];
+            for (byte col = 0; col < COLUMNS_TOP; col++)
+            {
+                stacks[COLUMNS_FIELD][col] = topArea[col].GetFingerprint();
+            }
+
+            return stacks;
         }
     }
 }

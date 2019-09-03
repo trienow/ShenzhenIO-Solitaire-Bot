@@ -43,7 +43,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GameState.cs" />
     <Compile Include="Player.cs" />
+    <Compile Include="PlayingFields.cs" />
     <Compile Include="Turn.cs" />
     <Compile Include="Card.cs" />
     <Compile Include="PlayingField.cs" />

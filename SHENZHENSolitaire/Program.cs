@@ -10,6 +10,8 @@ namespace SHENZENSolitaire
     {
         static void Main(string[] args)
         {
+            Player p = new Player(PlayingFields.A1);
+            p.FindSolution();
         }
     }
 }
