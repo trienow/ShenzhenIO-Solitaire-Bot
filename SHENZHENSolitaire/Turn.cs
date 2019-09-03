@@ -3,11 +3,11 @@
     public struct Turn
     {
         public bool FromTop { get; set; }
-        public int FromColumn { get; set; }
-        public int FromRow { get; set; }
+        public byte FromColumn { get; set; }
+        public byte FromRow { get; set; }
         
         public bool ToTop { get; set; }
-        public int ToColumn { get; set; }
+        public byte ToColumn { get; set; }
 
         public override string ToString()
         {

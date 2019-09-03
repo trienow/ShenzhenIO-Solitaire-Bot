@@ -16,14 +16,16 @@ namespace SHENZENSolitaire
             List<Turn> turns = new List<Turn>();
             List<Turn> bufferTurns = new List<Turn>();
 
+
+
             #region [FROM BUFFER]
-            for (int i = 0; i < 3; i++)
+            for (byte i = 0; i < PlayingField.COLUMNS_BUFFER; i++)
             {
                 if (field[i].Suit == SuitEnum.BLOCKED || field[i].Suit == SuitEnum.EMPTY) continue;
 
                 Turn turn = new Turn { FromColumn = i, FromTop = true, ToTop = true };
 
-                for (int j = 3; j < PlayingField.COLUMNS_TOP; j++)
+                for (byte j = PlayingField.COLUMNS_BUFFER; j < PlayingField.COLUMNS_TOP; j++)
                 {
                     turn.ToColumn = j;
                     if (field.IsTurnAllowed(turn))
@@ -33,7 +35,7 @@ namespace SHENZENSolitaire
                 }
 
                 turn.ToTop = false;
-                for (int j = 0; j < PlayingField.COLUMNS_FIELD; j++)
+                for (byte j = 0; j < PlayingField.COLUMNS_FIELD; j++)
                 {
                     turn.ToColumn = j;
                     if (field.IsTurnAllowed(turn))
@@ -45,16 +47,16 @@ namespace SHENZENSolitaire
             #endregion
 
             #region [FROM FIELD]
-            for (int col = 0; col < PlayingField.COLUMNS_FIELD; col++)
+            for (byte col = 0; col < PlayingField.COLUMNS_FIELD; col++)
             {
                 int columnLength = field.GetColumnLength(col);
-                for (int row = 0; row < columnLength; row++)
+                for (byte row = 0; row < columnLength; row++)
                 {
                     if (!field.IsMovable(col, row)) continue;
 
                     Turn turn = new Turn { FromColumn = col, FromRow = row, FromTop = false, ToTop = true };
                     #region [TO OUTPUT]
-                    for (int i = 3; i < PlayingField.COLUMNS_TOP; i++) //Check the output slots first
+                    for (byte i = PlayingField.COLUMNS_BUFFER; i < PlayingField.COLUMNS_TOP; i++) //Check the output slots first
                     {
                         turn.ToColumn = i;
                         if (field.IsTurnAllowed(turn))
@@ -66,7 +68,7 @@ namespace SHENZENSolitaire
 
                     #region [TO FIELD]
                     turn.ToTop = false;
-                    for (int i = 0; i < PlayingField.COLUMNS_FIELD; i++)
+                    for (byte i = 0; i < PlayingField.COLUMNS_FIELD; i++)
                     {
                         if (i == col) continue;
 
@@ -80,7 +82,7 @@ namespace SHENZENSolitaire
 
                     #region [TO BUFFER]
                     turn.ToTop = true;
-                    for (int i = 0; i < 3; i++)
+                    for (byte i = 0; i < PlayingField.COLUMNS_BUFFER; i++)
                     {
                         turn.ToColumn = i;
                         if (field.IsTurnAllowed(turn))
