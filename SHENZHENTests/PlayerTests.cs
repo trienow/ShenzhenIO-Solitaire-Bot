@@ -14,7 +14,6 @@ namespace SHENZHENTests
         {
             Player p = new Player(PlayingFields.A1);
             List<Turn> turns = p.FindAllPossibleTurns();
-
         }
     }
 }

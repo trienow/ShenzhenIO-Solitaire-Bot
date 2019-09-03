@@ -3,25 +3,41 @@ using System.Collections.Generic;
 
 namespace SHENZENSolitaire
 {
-    public class PlayingField : ICloneable
+    public class PlayingField
     {
         public const int COLUMNS_TOP = 7;
         public const int COLUMNS_FIELD = 8;
-        private const int MAX_ROWS_FIELD = 10;
+        public const int MAX_ROWS_FIELD = 10;
 
         private readonly Card[] topArea = new Card[COLUMNS_TOP];
         private readonly List<Card>[] fieldArea = new List<Card>[COLUMNS_FIELD]; //Array: Column | List: Row
 
+        /// <summary>
+        /// Gets a card in the specified column of the top part of the playing field
+        /// </summary>
+        /// <param name="col">The interested column</param>
+        /// <returns>The card in the specified slot</returns>
         public Card this[int col]
         {
             get => topArea[col];
         }
 
+        /// <summary>
+        /// Gets a card at the defined position in the field
+        /// </summary>
+        /// <param name="col">The column of the stack of cards.</param>
+        /// <param name="row">The card index in the column</param>
+        /// <returns>The card object</returns>
         public Card this[int col, int row]
         {
             get => fieldArea[col][row];
         }
 
+        /// <summary>
+        /// Gets the length of a stack of cards.
+        /// </summary>
+        /// <param name="col">The column of the playing field to the stack size from</param>
+        /// <returns>The card count of the stack</returns>
         public int GetColumnLength(int col) => fieldArea[col].Count;
 
         /// <summary>
@@ -57,6 +73,34 @@ namespace SHENZENSolitaire
                 {
                     this.fieldArea[col].Add(card);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Unpacks the <paramref name="fingerprint"/> to recreate the playing field
+        /// </summary>
+        /// <param name="fingerprint">The fingerprint <see cref="byte"/> array to load</param>
+        public PlayingField(byte[] fingerprint) : this()
+        {
+            int f = 0;
+            for (; f < COLUMNS_TOP; f++)
+            {
+                topArea[f] = Card.Unpack(fingerprint[f]);
+            }
+
+            int col = 0;
+            f++;
+            for (; f < fingerprint.Length; f++)
+            {
+                if (fingerprint[f] == 0xFF)
+                {
+                    col++;
+
+                    if (col >= COLUMNS_FIELD) break;
+                    continue;
+                }
+
+                fieldArea[col].Add(Card.Unpack(fingerprint[f]));
             }
         }
 
@@ -223,11 +267,115 @@ namespace SHENZENSolitaire
             return allowed;
         }
 
+        public bool CanMergeDragons(SuitEnum color)
+        {
+            Card dragonCard = new Card(0, color);
+            int visibleDragons = 0;
+            bool hasEmptyBufferSlot = false;
+            for (int i = 0; i < 3; i++)
+            {
+                if (topArea[i] == dragonCard)
+                {
+                    hasEmptyBufferSlot = true;
+                    visibleDragons++;
+                }
+                else if (!hasEmptyBufferSlot && topArea[i].Suit == SuitEnum.EMPTY)
+                {
+                    hasEmptyBufferSlot = true;
+                }
+            }
+
+            bool result = false;
+            if (hasEmptyBufferSlot)
+            {
+                for (int col = 0; col < COLUMNS_FIELD; col++)
+                {
+                    int columnLength = GetColumnLength(col);
+                    for (int row = 0; row < columnLength; row++)
+                    {
+                        if (fieldArea[col][row] == dragonCard)
+                        {
+                            if (IsMovable(col, row))
+                            {
+                                if (++visibleDragons == 4)
+                                {
+                                    result = true;
+                                    goto END;
+                                }
+                            }
+                            else
+                            {
+                                goto END;
+                            }
+                        }
+                    }
+                }
+            }
+
+        END: return result;
+        }
+
         /// <summary>
-        /// Performs a turn on the field
+        /// Performs an unchecked merge on the field. Check with <see cref="CanMergeDragons(SuitEnum)"/>.
+        /// </summary>
+        /// <param name="color"></param>
+        public void PerformDragonMerge(SuitEnum color)
+        {
+            bool hasBlocked = false;
+            Card dragonCard = new Card(0, color);
+            int dragonsFound = 0;
+
+            //Reserve and clear dragons from the top part
+            for (int col = 0; col < 3; col++)
+            {
+                if (topArea[col] == dragonCard)
+                {
+                    if (hasBlocked)
+                    {
+                        topArea[col] = new Card(0, SuitEnum.EMPTY);
+                    }
+                    else
+                    {
+                        topArea[col] = new Card(0, SuitEnum.BLOCKED);
+                        hasBlocked = true;
+                        dragonsFound++;
+                    }
+                }
+                else if (topArea[col].Suit == SuitEnum.EMPTY)
+                {
+                    if (!hasBlocked)
+                    {
+                        topArea[col] = new Card(0, SuitEnum.BLOCKED);
+                        hasBlocked = true;
+                    }
+                }
+            }
+
+            //Clear dragons from the field
+            for (int col = 0; col < COLUMNS_FIELD; col++)
+            {
+                int columnLength = GetColumnLength(col);
+                for (int row = columnLength - 1; row >= 0; row--)
+                {
+                    if (fieldArea[col][row] == dragonCard)
+                    {
+                        fieldArea[col].RemoveAt(row);
+                        dragonsFound++;
+                    }
+                }
+
+                if (dragonsFound == 4)
+                {
+                    break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Performs an unchecked turn on the field. Check with <see cref="IsTurnAllowed(Turn)"/>.
         /// </summary>
         /// <param name="turn">The action to perform</param>
-        public void PerformTurnUnchecked(Turn turn)
+        public void PerformTurn(Turn turn)
         {
             int toCol = turn.ToColumn;
             int fromCol = turn.FromColumn;
@@ -264,9 +412,52 @@ namespace SHENZENSolitaire
             }
         }
 
-        public object Clone()
+        /// <summary>
+        /// Indicates a finished game
+        /// </summary>
+        /// <returns>Returns true, when all output slots have been filled with the right cards</returns>
+        public bool IsGameOver()
         {
-            return new PlayingField(this);
+            return topArea[3].Suit == SuitEnum.ROSE && topArea[4].Value == 9 && topArea[5].Value == 9 && topArea[6].Value == 9;
+        }
+
+        /// <summary>
+        /// Creates a <see cref="byte[]"/> representing this object
+        /// </summary>
+        /// <returns>A <see cref="byte"/> representation of this playing field</returns>
+        public byte[] MakeFingerprint()
+        {
+            int length = COLUMNS_TOP + 1 + COLUMNS_FIELD + 1;
+
+            for (int col = 0; col < COLUMNS_FIELD; col++)
+            {
+                length += GetColumnLength(col);
+            }
+
+            byte[] fingerprint = new byte[length];
+            int f = 0;
+            foreach (Card c in topArea)
+            {
+                fingerprint[f] = c.GetFingerprint();
+                f++;
+            }
+
+            fingerprint[f] = 0xFF;
+            f++;
+
+            foreach (List<Card> column in fieldArea)
+            {
+                foreach (Card c in column)
+                {
+                    fingerprint[f] = c.GetFingerprint();
+                    f++;
+                }
+
+                fingerprint[f] = 0xFF;
+                f++;
+            }
+
+            return fingerprint;
         }
     }
 }

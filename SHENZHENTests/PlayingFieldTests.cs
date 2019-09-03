@@ -1,9 +1,6 @@
 ﻿using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SHENZENSolitaire;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SHENZHENTests
 {
@@ -47,6 +44,14 @@ namespace SHENZHENTests
             pf.IsMovable(2, 1).Should().BeTrue();
             pf.IsMovable(2, 2).Should().BeTrue();
             pf.IsMovable(2, 3).Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void Package()
+        {
+            byte[] pack = PlayingFields.A1.MakeFingerprint();
+            PlayingField p = new PlayingField(pack);
+            p.MakeFingerprint().Should().BeEquivalentTo(pack);
         }
     }
 }

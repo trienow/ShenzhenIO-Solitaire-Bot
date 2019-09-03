@@ -1,6 +1,6 @@
 ﻿namespace SHENZENSolitaire
 {
-    public enum SuitEnum
+    public enum SuitEnum : byte
     {
         RED,
         GREEN,
