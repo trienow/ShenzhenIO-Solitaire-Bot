@@ -123,8 +123,8 @@ namespace SHENZENSolitaire
                 }
                 #endregion
             }
-            
-            if(turns.Count == 0)
+
+            if (turns.Count == 0)
             {
                 List<Turn> toBufferTurns = new List<Turn>();
                 #region [FROM FIELD TO FIELD / BUFFER]
@@ -203,23 +203,27 @@ namespace SHENZENSolitaire
 
         private List<GameState> EvaluateState(PlayingField field, List<GameState> path)
         {
-            if (path.Count < 4000)
+            if (path.Count < 200)
             {
                 List<Turn> turns = FindAllPossibleTurns(field);
-                GameState newState = new GameState();
-                if (turns.Count == 0 && field.IsGameOver())
+                int totalPossibilities = turns.Count;
+                if (totalPossibilities == 0 && field.IsGameOver())
                 {
+                    GameState newState = new GameState();
                     newState.Fingerprints = path.Last().Fingerprints;
                     newState.PrecedingTurn = new Turn { Finished = true };
                     path.Add(newState);
                 }
                 else
                 {
-                    newState.TotalPossibilities = turns.Count;
-                    foreach (Turn t in turns)
+                    //Parallel.ForEach(turns,(t, loopState) =>
+                    foreach(Turn t in turns)
                     {
+                        lock (this) { tries++; }
+
+                        GameState newState = new GameState();
+                        newState.TotalPossibilities = totalPossibilities;
                         newState.MakeState(field, t);
-                        tries++;
 
                         if (!newState.HasEquivaltentStack(path))
                         {
@@ -228,10 +232,11 @@ namespace SHENZENSolitaire
                             if (newPath.Count > path.Count + 1)
                             {
                                 path = newPath;
+                                //loopState.Break();
                                 break;
                             }
                         }
-                    }
+                    }//);
                 }
             }
             return path;
@@ -241,6 +246,7 @@ namespace SHENZENSolitaire
         {
             List<GameState> result = null;
             List<Turn> turns = FindAllPossibleTurns(Field);
+
             Parallel.ForEach(turns, (t, loopState) =>
             {
                 GameState initialGameState = new GameState();
@@ -250,7 +256,7 @@ namespace SHENZENSolitaire
                 if (path.Count > 1)
                 {
                     result = path;
-                    loopState.Break();
+                    loopState.Stop();
                 }
             });
         }
