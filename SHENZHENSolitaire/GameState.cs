@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace SHENZENSolitaire
 {
-    class GameState
+   public class GameState
     {
         public const byte TOP_FINGERPRINT_INDEX = PlayingField.COLUMNS_FIELD;
 

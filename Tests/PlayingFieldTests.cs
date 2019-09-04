@@ -2,7 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SHENZENSolitaire;
 
-namespace SHENZHENTests
+namespace Tests
 {
     [TestClass]
     public class PlayingFieldTests

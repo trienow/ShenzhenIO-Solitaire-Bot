@@ -242,7 +242,7 @@ namespace SHENZENSolitaire
             return path;
         }
 
-        public void FindSolution()
+        public List<GameState> FindSolution()
         {
             List<GameState> result = null;
             List<Turn> turns = FindAllPossibleTurns(Field);
@@ -259,6 +259,8 @@ namespace SHENZENSolitaire
                     loopState.Stop();
                 }
             });
+
+            return result;
         }
     }
 }
