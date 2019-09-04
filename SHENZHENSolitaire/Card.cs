@@ -32,6 +32,11 @@
             return obj is Card c && c.Suit == Suit && c.Value == Value;
         }
 
+        public bool Equals(Card c)
+        {
+            return c.Suit == Suit && c.Value == Value;
+        }
+
         /// <summary>
         /// Returns this card's value and suit packed into a byte.
         /// Special Values: 0xFF => Section change for the playing field
@@ -52,7 +57,7 @@
             return new Card((byte)(packedValue & 0b1111), (SuitEnum)(packedValue >> 4));
         }
 
-        public static bool operator ==(Card a, Card b) => a is Card a1 && b is Card b1 && a1.Equals(b1);
+        public static bool operator ==(Card a, Card b) => a is Card && b is Card && a.Equals(b);
 
         public static bool operator !=(Card a, Card b) => !(a == b);
     }

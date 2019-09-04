@@ -128,29 +128,63 @@ namespace SHENZENSolitaire
             {
                 List<Turn> toBufferTurns = new List<Turn>();
                 #region [FROM FIELD TO FIELD / BUFFER]
+
+                int[] neededOutputCardValue =
+                {
+                    field[4].Value + 1, //RED
+                    field[5].Value + 1, //BLACK
+                    field[6].Value + 1  //GREEN
+                };
+
                 foreach (Card card in MOVEMENT_PRIORITY)
                 {
                     bool foundCard = false;
                     for (byte col = 0; col < PlayingField.COLUMNS_FIELD; col++)
                     {
                         int columnLength = field.GetColumnLength(col);
-                        for (int row = columnLength - 1; row >= 0; row--)
+                        for (int row = columnLength - 1; row >= 0; row--) // <- reverse!
                         {
                             if (!field.IsMovable(col, row)) break; //<- If the top card isn't movable, the ones behind it definitely won't be
                             if (field[col, row] != card) continue; //<- If it isn't the card we are searching for, just continue.
 
+                            if (row > 0 && field.IsMovable(col, row - 1)) //<- Check for illegal stack breaking
+                            {
+                                Card cardBehind = field[col, row - 1];
+                                if (cardBehind.Suit == SuitEnum.RED && cardBehind.Value != neededOutputCardValue[0]) break;
+                                else if (cardBehind.Suit == SuitEnum.BLACK && cardBehind.Value != neededOutputCardValue[1]) break;
+                                else if (cardBehind.Suit == SuitEnum.GREEN && cardBehind.Value != neededOutputCardValue[2]) break;
+                            }
+
                             Turn turn = new Turn { FromColumn = col, FromRow = (byte)row, FromTop = false, ToTop = false };
 
                             #region [TO FIELD]
+                            Turn turnToEmptyStack = new Turn(); //<- Make sure empty stacks are prioritized last
+                            bool evaluatedEmptyStack = false;
                             for (byte i = 0; i < PlayingField.COLUMNS_FIELD; i++)
                             {
                                 if (i == col) continue;
 
+                                if (evaluatedEmptyStack) continue; //<---------- AND : Make sure, empty stacks are routed to, only once
+                                bool stackEmpty = field.GetColumnLength(i) == 0; //  |
+                                if (stackEmpty) evaluatedEmptyStack = true; // <------
+
                                 turn.ToColumn = i;
                                 if (field.IsTurnAllowed(turn))
                                 {
-                                    turns.Add(turn);
+                                    if (stackEmpty)
+                                    {
+                                        turnToEmptyStack = turn;
+                                    }
+                                    else
+                                    {
+                                        turns.Add(turn);
+                                    }
                                 }
+                            }
+
+                            if (evaluatedEmptyStack) //<- Make sure empty stacks are prioritized last
+                            {
+                                turns.Add(turnToEmptyStack);
                             }
                             #endregion
 
@@ -162,7 +196,7 @@ namespace SHENZENSolitaire
                                 if (field.IsTurnAllowed(turn))
                                 {
                                     toBufferTurns.Add(turn);
-                                    break;
+                                    break; // <- If it works once, it can be definitely be filled.
                                 }
                             }
                             #endregion
@@ -179,14 +213,18 @@ namespace SHENZENSolitaire
                 #endregion
 
                 #region [FROM BUFFER TO FIELD]
-                for (byte i = 0; i < PlayingField.COLUMNS_BUFFER; i++)
+                for (byte col = 0; col < PlayingField.COLUMNS_BUFFER; col++)
                 {
-                    if (field[i].Suit == SuitEnum.BLOCKED || field[i].Suit == SuitEnum.EMPTY) continue;
+                    if (field[col].Suit == SuitEnum.BLOCKED || field[col].Suit == SuitEnum.EMPTY) continue;
 
-                    Turn turn = new Turn { FromColumn = i, FromTop = true, ToTop = false };
-                    for (byte j = 0; j < PlayingField.COLUMNS_FIELD; j++)
+                    bool evaluatedEmptyStack = false;
+                    Turn turn = new Turn { FromColumn = col, FromTop = true, ToTop = false };
+                    for (byte i = 0; i < PlayingField.COLUMNS_FIELD; i++)
                     {
-                        turn.ToColumn = j;
+                        if (evaluatedEmptyStack) continue; //<- AND \/- Make sure, empty stacks are routed to, only once
+                        if (field.GetColumnLength(i) == 0) evaluatedEmptyStack = true;
+
+                        turn.ToColumn = i;
                         if (field.IsTurnAllowed(turn))
                         {
                             turns.Add(turn);
@@ -217,11 +255,17 @@ namespace SHENZENSolitaire
                 else
                 {
                     //Parallel.ForEach(turns,(t, loopState) =>
-                    foreach(Turn t in turns)
+                    int localTries = 0;
+                    foreach (Turn t in turns)
                     {
-                        lock (this) { tries++; }
-
                         GameState newState = new GameState();
+
+                        lock (this)
+                        {
+                            this.tries++;
+                            newState.Tries = localTries++;
+                        }
+
                         newState.TotalPossibilities = totalPossibilities;
                         newState.MakeState(field, t);
 

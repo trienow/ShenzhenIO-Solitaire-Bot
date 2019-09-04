@@ -32,8 +32,6 @@ namespace SHENZENSolitaire
             PrecedingTurn = nextTurn;
             Field = currentField.PerformTurn(nextTurn);
             Fingerprints = Field.MakeFingerprints();
-
-            Tries++;
         }
 
         public bool HasEquivaltentStack(List<GameState> states)

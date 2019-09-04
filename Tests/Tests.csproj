@@ -59,7 +59,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CardTests.cs" />
-    <Compile Include="Class1.cs" />
     <Compile Include="PlayerTests.cs" />
     <Compile Include="PlayingFields.cs" />
     <Compile Include="PlayingFieldTests.cs" />
