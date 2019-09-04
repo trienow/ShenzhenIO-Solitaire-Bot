@@ -477,8 +477,8 @@ namespace SHENZENSolitaire
                     else
                     {
                         field.fieldArea[toCol].Add(field.topArea[fromCol]);
-                        field.topArea[fromCol] = new Card();
                     }
+                    field.topArea[fromCol] = Card.EMPTY;
                 }
                 else
                 {
