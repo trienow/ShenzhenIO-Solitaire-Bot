@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Schedulers;
 
 namespace SHENZENSolitaire
 {
@@ -42,6 +43,8 @@ namespace SHENZENSolitaire
                 Card.DRAGON_BLACK
             };
         private int tries = 0;
+        private static readonly LimitedConcurrencyLevelTaskScheduler LIMITED_TASK_SCHED = new LimitedConcurrencyLevelTaskScheduler(20);
+        private static readonly ParallelOptions PARALLEL_OPTIONS = new ParallelOptions { MaxDegreeOfParallelism = 2, TaskScheduler = LIMITED_TASK_SCHED };
 
         public Player(PlayingField field)
         {
@@ -217,18 +220,32 @@ namespace SHENZENSolitaire
                 {
                     if (field[col].Suit == SuitEnum.BLOCKED || field[col].Suit == SuitEnum.EMPTY) continue;
 
+                    Turn turnToEmptyStack = new Turn(); //<- Make sure empty stacks are prioritized last
                     bool evaluatedEmptyStack = false;
                     Turn turn = new Turn { FromColumn = col, FromTop = true, ToTop = false };
                     for (byte i = 0; i < PlayingField.COLUMNS_FIELD; i++)
                     {
-                        if (evaluatedEmptyStack) continue; //<- AND \/- Make sure, empty stacks are routed to, only once
-                        if (field.GetColumnLength(i) == 0) evaluatedEmptyStack = true;
+                        if (evaluatedEmptyStack) continue; //<---------- AND : Make sure, empty stacks are routed to, only once
+                        bool stackEmpty = field.GetColumnLength(i) == 0; //  |
+                        if (stackEmpty) evaluatedEmptyStack = true; // <------
 
                         turn.ToColumn = i;
                         if (field.IsTurnAllowed(turn))
                         {
-                            turns.Add(turn);
+                            if (stackEmpty)
+                            {
+                                turnToEmptyStack = turn;
+                            }
+                            else
+                            {
+                                turns.Add(turn);
+                            }
                         }
+                    }
+
+                    if (evaluatedEmptyStack) //<- Make sure empty stacks are prioritized last
+                    {
+                        turns.Add(turnToEmptyStack);
                     }
                 }
                 #endregion
@@ -254,9 +271,9 @@ namespace SHENZENSolitaire
                 }
                 else
                 {
-                    //Parallel.ForEach(turns,(t, loopState) =>
                     int localTries = 0;
-                    foreach (Turn t in turns)
+                    Parallel.ForEach(turns, PARALLEL_OPTIONS, (t, loopState) =>
+                    //foreach (Turn t in turns)
                     {
                         GameState newState = new GameState();
 
@@ -276,11 +293,11 @@ namespace SHENZENSolitaire
                             if (newPath.Count > path.Count + 1)
                             {
                                 path = newPath;
-                                //loopState.Break();
-                                break;
+                                loopState.Break();
+                                //break;
                             }
                         }
-                    }//);
+                    });
                 }
             }
             return path;
@@ -291,7 +308,7 @@ namespace SHENZENSolitaire
             List<GameState> result = null;
             List<Turn> turns = FindAllPossibleTurns(Field);
 
-            Parallel.ForEach(turns, (t, loopState) =>
+            Parallel.ForEach(turns, PARALLEL_OPTIONS, (t, loopState) =>
             {
                 GameState initialGameState = new GameState();
                 initialGameState.MakeState(Field, t);

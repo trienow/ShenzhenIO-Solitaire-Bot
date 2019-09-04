@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GameState.cs" />
+    <Compile Include="LimitedConcurrencyLevelTaskScheduler.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="PlayingFields.cs" />
     <Compile Include="ScreenExtractor.cs" />
