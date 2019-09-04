@@ -9,6 +9,32 @@ namespace SHENZENSolitaire
 
         public byte[][] Fingerprints { get; set; }
         public Turn PrecedingTurn { get; set; }
+        public PlayingField Field { get; set; }
+
+        public Card MovedCard { get; private set; } = Card.EMPTY;
+        public int Tries { get; set; }
+        public int TotalPossibilities { get; set; }
+
+        public void MakeState(PlayingField currentField, Turn nextTurn)
+        {
+            if (nextTurn.MergeDragons == default(SuitEnum) && !nextTurn.Finished)
+            {
+                if (nextTurn.FromTop)
+                {
+                    MovedCard = currentField[nextTurn.FromColumn];
+                }
+                else
+                {
+                    MovedCard = currentField[nextTurn.FromColumn, nextTurn.FromRow];
+                }
+            }
+
+            PrecedingTurn = nextTurn;
+            Field = currentField.PerformTurn(nextTurn);
+            Fingerprints = Field.MakeFingerprints();
+
+            Tries++;
+        }
 
         public bool HasEquivaltentStack(List<GameState> states)
         {

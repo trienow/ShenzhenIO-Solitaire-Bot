@@ -57,16 +57,42 @@ namespace SHENZENSolitaire
             new Card(8, SuitEnum.BLACK),
             new Card(9, SuitEnum.BLACK),
         };
-        private static readonly Card[] DECK_BUFFER;
-
-        static PlayingField()
+        private static readonly Card[] DECK_BUFFER = new Card[]
         {
-            int deckLen = DECK.Length;
-            DECK_BUFFER = new Card[deckLen + 2];
-            DECK_BUFFER[0] = Card.BLOCKED;
-            Array.Copy(DECK, 0, DECK_BUFFER, 0, deckLen);
-            DECK_BUFFER[deckLen + 1] = Card.EMPTY;
-        }
+            Card.EMPTY,
+            Card.BLOCKED,
+            new Card(suit: SuitEnum.ROSE),
+            Card.DRAGON_RED,
+            Card.DRAGON_GREEN,
+            Card.DRAGON_BLACK,
+            new Card(1, SuitEnum.RED),
+            new Card(2, SuitEnum.RED),
+            new Card(3, SuitEnum.RED),
+            new Card(4, SuitEnum.RED),
+            new Card(5, SuitEnum.RED),
+            new Card(6, SuitEnum.RED),
+            new Card(7, SuitEnum.RED),
+            new Card(8, SuitEnum.RED),
+            new Card(9, SuitEnum.RED),
+            new Card(1, SuitEnum.GREEN),
+            new Card(2, SuitEnum.GREEN),
+            new Card(3, SuitEnum.GREEN),
+            new Card(4, SuitEnum.GREEN),
+            new Card(5, SuitEnum.GREEN),
+            new Card(6, SuitEnum.GREEN),
+            new Card(7, SuitEnum.GREEN),
+            new Card(8, SuitEnum.GREEN),
+            new Card(9, SuitEnum.GREEN),
+            new Card(1, SuitEnum.BLACK),
+            new Card(2, SuitEnum.BLACK),
+            new Card(3, SuitEnum.BLACK),
+            new Card(4, SuitEnum.BLACK),
+            new Card(5, SuitEnum.BLACK),
+            new Card(6, SuitEnum.BLACK),
+            new Card(7, SuitEnum.BLACK),
+            new Card(8, SuitEnum.BLACK),
+            new Card(9, SuitEnum.BLACK),
+        };
 
         /// <summary>
         /// Gets a card in the specified column of the top part of the playing field
@@ -279,9 +305,9 @@ namespace SHENZENSolitaire
                 if (allowed && !turn.ToTop && destinationColumnLength > 0)
                 {
                     allowed = destinationColumnLength + cardBunch < MAX_ROWS_FIELD; //<- If the destination column is not already full
-                    
+
                     allowed = allowed && fromCard.Value != 0; //<- Stacking Dragons onto anything is not allowed
-                    
+
                     //If the destination column can accept the card at all
                     Card toCard = this.fieldArea[toCol][destinationColumnLength - 1];
                     allowed = allowed && fromCard.Value + 1 == toCard.Value && fromCard.Suit != toCard.Suit; //<- Rule for stacking numbers
@@ -568,10 +594,36 @@ namespace SHENZENSolitaire
                 }
             }
 
+            //The buffer should remain the same every permutation
             stacks[COLUMNS_FIELD] = new byte[COLUMNS_TOP];
-            for (byte col = 0; col < COLUMNS_TOP; col++)
+            byte f = 0;
+            foreach (Card c in DECK_BUFFER)
             {
-                stacks[COLUMNS_FIELD][col] = topArea[col].GetFingerprint();
+                //Fill the array with the buffer area, ignoring different permutations
+                for (byte col = 0; col < COLUMNS_BUFFER; col++)
+                {
+                    if (c == this.topArea[col])
+                    {
+                        stacks[COLUMNS_FIELD][f] = c.GetFingerprint();
+                        f++;
+
+                        if (c.Value > 0 || c.Suit == SuitEnum.ROSE)
+                        {
+                            break; //<- Since we can only have one of each colored number / rose
+                        }
+                    }
+                }
+
+                if (f == 3)
+                {
+                    break;
+                }
+            }
+
+            //Transfer the outputs
+            for (; f < COLUMNS_TOP; f++)
+            {
+                stacks[COLUMNS_FIELD][f] = topArea[f].GetFingerprint();
             }
 
             return stacks;
