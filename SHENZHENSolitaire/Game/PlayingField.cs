@@ -215,9 +215,22 @@ namespace SHENZENSolitaire.Game
         {
             if (topSlots)
             {
-                this.topArea[column] = card;
+                if (column > 2)
+                {
+                    switch (card.Suit)
+                    {
+                        case SuitEnum.ROSE: topArea[3] = card; break;
+                        case SuitEnum.RED: topArea[4] = card; break;
+                        case SuitEnum.BLACK: topArea[5] = card; break;
+                        case SuitEnum.GREEN: topArea[6] = card; break;
+                    }
+                }
+                else
+                {
+                    this.topArea[column] = card;
+                }
             }
-            else if(card.Suit != SuitEnum.EMPTY && card.Suit != SuitEnum.BLOCKED)
+            else if (card.Suit != SuitEnum.EMPTY && card.Suit != SuitEnum.BLOCKED)
             {
                 this.fieldArea[column].Add(card);
             }

@@ -19,16 +19,24 @@ namespace SHENZENSolitaire.Extractor
             field.SetSlot(true, 2, ih.GetCardAt(xs[2], 315));
 
             field.SetSlot(true, 3, ih.GetCardAt(1301, 315));
-
-            Card[] outputCards = new Card[] { ih.GetCardAt(xs[5], 315), ih.GetCardAt(xs[6], 315), ih.GetCardAt(xs[7], 315) };
-            for (int i = 0; i < 3; i++)
+            
+            for (int x = 5; x < 8; x++)
             {
-                switch (outputCards[i].Suit)
+                ExtractedCard bestExCard = ih.GetCardAt(xs[x], 315);
+                for (int y = 314; y >= 300; y--) //<- The higher the card number is, the higher the card is placed on screen!
                 {
-                    case SuitEnum.RED: field.SetSlot(true, 4, outputCards[i]); break;
-                    case SuitEnum.BLACK: field.SetSlot(true, 5, outputCards[i]); break;
-                    case SuitEnum.GREEN: field.SetSlot(true, 6, outputCards[i]); break;
+                    ExtractedCard exCard = ih.GetCardAt(xs[x], y);
+                    if (exCard.Error < bestExCard.Error)
+                    {
+                        bestExCard = exCard;
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
+
+                field.SetSlot(true, 7, bestExCard); //<- The playing field will place the card in the correct slot
             }
 
             Parallel.For(0, 8, (col) =>

@@ -3,7 +3,6 @@ using SHENZENSolitaire.Extractor;
 using SHENZENSolitaire.Game;
 using System;
 using System.Collections.Generic;
-using System.Threading;
 
 namespace SHENZENSolitaire
 {
