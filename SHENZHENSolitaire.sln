@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SHENZHENSolitaire", "SHENZH
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{74F0679E-D27B-436F-80AA-EFA8AB99AA84}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardFingerprintGenerator", "CardFingerprintGenerator\CardFingerprintGenerator.csproj", "{C5F13A18-F25F-48F0-A928-F7FF1F68DF62}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{74F0679E-D27B-436F-80AA-EFA8AB99AA84}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{74F0679E-D27B-436F-80AA-EFA8AB99AA84}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{74F0679E-D27B-436F-80AA-EFA8AB99AA84}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C5F13A18-F25F-48F0-A928-F7FF1F68DF62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C5F13A18-F25F-48F0-A928-F7FF1F68DF62}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C5F13A18-F25F-48F0-A928-F7FF1F68DF62}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C5F13A18-F25F-48F0-A928-F7FF1F68DF62}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
