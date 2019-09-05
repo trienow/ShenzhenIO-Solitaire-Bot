@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Extractor\ReferenceImages.cs" />
     <Compile Include="Player\GameState.cs" />
     <Compile Include="Utils\LimitedConcurrencyLevelTaskScheduler.cs" />
     <Compile Include="Player\Player.cs" />
@@ -55,6 +56,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Game\SuitEnum.cs" />
+    <Compile Include="Utils\PlayingFieldPrinter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

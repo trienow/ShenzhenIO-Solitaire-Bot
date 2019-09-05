@@ -1,73 +1,39 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
+﻿using SHENZENSolitaire.Game;
+using SHENZENSolitaire.Utils;
 using System.Threading.Tasks;
 
 namespace SHENZENSolitaire.Extractor
 {
     public class ScreenExtractor
     {
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern IntPtr GetDesktopWindow();
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern IntPtr GetWindowDC(IntPtr window);
-        [DllImport("gdi32.dll", SetLastError = true)]
-        private static extern uint GetPixel(IntPtr dc, int x, int y);
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern int ReleaseDC(IntPtr window, IntPtr dc);
-
-        private static Color GetColorAt(int x, int y)
+        public static PlayingField ExtractField()
         {
-            int a = (int)GetARGBAt(x, y);
-            return Color.FromArgb(255, (a >> 0) & 0xff, (a >> 8) & 0xff, (a >> 16) & 0xff);
-        }
+            ImageHandler ih = new ImageHandler();
+            PlayingField field = new PlayingField();
 
-        private static uint GetARGBAt(int x, int y)
-        {
-            //Thanks to bitterblue: https://stackoverflow.com/a/24759418/7396282
-            IntPtr desk = GetDesktopWindow();
-            IntPtr dc = GetWindowDC(desk);
-            uint a = GetPixel(dc, x, y);
-            ReleaseDC(desk, dc);
-            return a;
-        }
+            int[] xs = new int[] { 733, 885, 1037, 1189, 1341, 1493, 1645, 1797 };
+            int[] ys = new int[] { 579, 610, 641, 672, 703 };
 
-        public string GetColors()
-        {
-            string colors = "";
+            field.SetSlot(true, 0, ih.GetCardAt(xs[0], 315));
+            field.SetSlot(true, 1, ih.GetCardAt(xs[1], 315));
+            field.SetSlot(true, 2, ih.GetCardAt(xs[2], 315));
 
-            int xBaseBase = 733;
-            int yBaseBase = 579;
-            for (int i = 0; i < 8; i++)
+            field.SetSlot(true, 3, ih.GetCardAt(1301, 315));
+            field.SetSlot(true, 4, ih.GetCardAt(xs[5], 315));
+            field.SetSlot(true, 5, ih.GetCardAt(xs[6], 315));
+            field.SetSlot(true, 6, ih.GetCardAt(xs[7], 315));
+
+            Parallel.For(0, 8, (col) =>
             {
-                int xBase = xBaseBase + 152 * i;
-                for (int j = 0; j < 5; j++)
+                for (int row = 0; row < 5; row++)
                 {
-                    int yBase = yBaseBase + 31 * j;
-                    colors += $"x: {xBase} y: {yBase} color: ";
-                    double dr = 0, dg = 0, db = 0;
-                    for (int x = xBase; x < xBase + 16; x++)
-                    {
-                        for (int y = yBase; y < yBase + 16; y++)
-                        {
-                            uint a = GetARGBAt(x, y);
-                            dr += ((a >> 0) & 0xff) / 256.0;
-                            dg += ((a >> 8) & 0xff) / 256.0;
-                            db += ((a >> 16) & 0xff) / 256.0;
-                        }
-                    }
+                    field.SetSlot(false, col, ih.GetCardAt(xs[col], ys[row]));
+                }
+            });
 
-                    colors += $"{(uint)dr} {(uint)dg} {(uint)db}\r\n";
-                } 
-            }
+            PlayingFieldPrinter.Print(field);
 
-            int yTop = 315;
-            int xRose = 1301;
-
-            return colors;
+            return field;
         }
     }
 }

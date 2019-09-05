@@ -217,7 +217,7 @@ namespace SHENZENSolitaire.Game
             {
                 this.topArea[column] = card;
             }
-            else
+            else if(card.Suit != SuitEnum.EMPTY && card.Suit != SuitEnum.BLOCKED)
             {
                 this.fieldArea[column].Add(card);
             }
