@@ -21,7 +21,6 @@ namespace SHENZENSolitaire.Utils
                 SetConsoleColor(c.Suit);
                 Console.Write($"  {GetPrefix(c.Suit)}{c.Value}  ");
 
-
                 SetConsoleColor(SuitEnum.EMPTY);
                 Console.Write(" ");
 
@@ -50,13 +49,15 @@ namespace SHENZENSolitaire.Utils
                         SetConsoleColor(SuitEnum.EMPTY);
                         Console.Write($"      ");
                     }
+                    else
+                    {
+                        Card c = field[col, row];
+                        SetConsoleColor(c.Suit);
+                        Console.Write($"  {GetPrefix(c.Suit)}{c.Value}  ");
 
-                    Card c = field[col, row];
-                    SetConsoleColor(c.Suit);
-                    Console.Write($"  {GetPrefix(c.Suit)}{c.Value}  ");
-                    
-                    SetConsoleColor(SuitEnum.EMPTY);
-                    Console.Write(" ");
+                        SetConsoleColor(SuitEnum.EMPTY);
+                        Console.Write(" ");
+                    }
                 }
                 Console.WriteLine();
             }
