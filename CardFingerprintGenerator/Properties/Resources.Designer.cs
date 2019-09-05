@@ -173,6 +173,16 @@ namespace CardFingerprintGenerator.Properties {
         /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap e1 {
+            get {
+                object obj = ResourceManager.GetObject("e1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap f0 {
             get {
                 object obj = ResourceManager.GetObject("f0", resourceCulture);

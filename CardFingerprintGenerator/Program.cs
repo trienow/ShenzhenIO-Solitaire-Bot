@@ -9,11 +9,48 @@ namespace CardFingerprintGenerator
 {
     class Program
     {
+        public static readonly Card[] POSSIBLE_STATES = new Card[]
+        {
+            Card.EMPTY,
+            new Card(1, SuitEnum.EMPTY), //<- The table
+            Card.BLOCKED,
+            new Card(suit: SuitEnum.ROSE),
+            Card.DRAGON_RED,
+            Card.DRAGON_GREEN,
+            Card.DRAGON_BLACK,
+            new Card(1, SuitEnum.RED),
+            new Card(2, SuitEnum.RED),
+            new Card(3, SuitEnum.RED),
+            new Card(4, SuitEnum.RED),
+            new Card(5, SuitEnum.RED),
+            new Card(6, SuitEnum.RED),
+            new Card(7, SuitEnum.RED),
+            new Card(8, SuitEnum.RED),
+            new Card(9, SuitEnum.RED),
+            new Card(1, SuitEnum.GREEN),
+            new Card(2, SuitEnum.GREEN),
+            new Card(3, SuitEnum.GREEN),
+            new Card(4, SuitEnum.GREEN),
+            new Card(5, SuitEnum.GREEN),
+            new Card(6, SuitEnum.GREEN),
+            new Card(7, SuitEnum.GREEN),
+            new Card(8, SuitEnum.GREEN),
+            new Card(9, SuitEnum.GREEN),
+            new Card(1, SuitEnum.BLACK),
+            new Card(2, SuitEnum.BLACK),
+            new Card(3, SuitEnum.BLACK),
+            new Card(4, SuitEnum.BLACK),
+            new Card(5, SuitEnum.BLACK),
+            new Card(6, SuitEnum.BLACK),
+            new Card(7, SuitEnum.BLACK),
+            new Card(8, SuitEnum.BLACK),
+            new Card(9, SuitEnum.BLACK),
+        };
+
         static void Main(string[] args)
         {
             try
             {
-
                 using (StreamWriter sw = new StreamWriter("./lut.cs", false, Encoding.UTF8))
                 {
                     sw.AutoFlush = true;
@@ -21,9 +58,15 @@ namespace CardFingerprintGenerator
                     sw.WriteLine("private readonly Card[] cards = new Card[]");
                     sw.WriteLine("{");
 
-                    foreach (Card c in PlayingField.DECK_BUFFER)
+                    foreach (Card c in POSSIBLE_STATES)
                     {
-                        sw.WriteLine($"\tnew Card({c.Value}, SuitEnum.{c.Suit.ToString()}),");
+                        byte cardValue = c.Value;
+                        if (c.Suit == SuitEnum.EMPTY && c.Value > 0) //<- Used for the table image
+                        {
+                            cardValue = 0;
+                        }
+
+                        sw.WriteLine($"\tnew Card({cardValue}, SuitEnum.{c.Suit.ToString()}),");
                     }
 
                     sw.WriteLine("};");
@@ -32,7 +75,7 @@ namespace CardFingerprintGenerator
                     sw.WriteLine("{");
 
 
-                    foreach (Card c in PlayingField.DECK_BUFFER)
+                    foreach (Card c in POSSIBLE_STATES)
                     {
                         sw.Write($"\tnew byte[]{{ ");
 
