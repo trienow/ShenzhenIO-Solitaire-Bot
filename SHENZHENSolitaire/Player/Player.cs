@@ -44,7 +44,7 @@ namespace SHENZENSolitaire.Actor
                 Card.DRAGON_BLACK
             };
         private int tries = 0;
-        private static readonly LimitedConcurrencyLevelTaskScheduler LIMITED_TASK_SCHED = new LimitedConcurrencyLevelTaskScheduler(20);
+        private static readonly LimitedConcurrencyLevelTaskScheduler LIMITED_TASK_SCHED = new LimitedConcurrencyLevelTaskScheduler(8);
         private static readonly ParallelOptions PARALLEL_OPTIONS = new ParallelOptions { MaxDegreeOfParallelism = 2, TaskScheduler = LIMITED_TASK_SCHED };
 
         public Player(PlayingField field)
