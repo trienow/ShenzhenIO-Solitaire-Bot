@@ -1,4 +1,4 @@
-﻿using SHENZENSolitaire;
+﻿using SHENZENSolitaire.Game;
 
 namespace Tests
 {

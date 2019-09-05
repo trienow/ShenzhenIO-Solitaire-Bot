@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using SHENZENSolitaire.Game;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Schedulers;
 
-namespace SHENZENSolitaire
+namespace SHENZENSolitaire.Actor
 {
     public class Player
     {
@@ -43,12 +44,12 @@ namespace SHENZENSolitaire
                 Card.DRAGON_BLACK
             };
         private int tries = 0;
-        private static readonly LimitedConcurrencyLevelTaskScheduler LIMITED_TASK_SCHED = new LimitedConcurrencyLevelTaskScheduler(20);
+        private static readonly LimitedConcurrencyLevelTaskScheduler LIMITED_TASK_SCHED = new LimitedConcurrencyLevelTaskScheduler(1);
         private static readonly ParallelOptions PARALLEL_OPTIONS = new ParallelOptions { MaxDegreeOfParallelism = 2, TaskScheduler = LIMITED_TASK_SCHED };
 
         public Player(PlayingField field)
         {
-            Field = field;
+            this.Field = field;
         }
 
         public static List<Turn> FindAllPossibleTurns(PlayingField field)
@@ -150,13 +151,13 @@ namespace SHENZENSolitaire
                             if (!field.IsMovable(col, row)) break; //<- If the top card isn't movable, the ones behind it definitely won't be
                             if (field[col, row] != card) continue; //<- If it isn't the card we are searching for, just continue.
 
-                            if (row > 0 && field.IsMovable(col, row - 1)) //<- Check for illegal stack breaking
-                            {
-                                Card cardBehind = field[col, row - 1];
-                                if (cardBehind.Suit == SuitEnum.RED && cardBehind.Value != neededOutputCardValue[0]) break;
-                                else if (cardBehind.Suit == SuitEnum.BLACK && cardBehind.Value != neededOutputCardValue[1]) break;
-                                else if (cardBehind.Suit == SuitEnum.GREEN && cardBehind.Value != neededOutputCardValue[2]) break;
-                            }
+                            //if (row > 0 && field.IsMovable(col, row - 1)) //<- Check for illegal stack breaking
+                            //{
+                            //    Card cardBehind = field[col, row - 1];
+                            //    if (cardBehind.Suit == SuitEnum.RED && cardBehind.Value != neededOutputCardValue[0]) break;
+                            //    else if (cardBehind.Suit == SuitEnum.BLACK && cardBehind.Value != neededOutputCardValue[1]) break;
+                            //    else if (cardBehind.Suit == SuitEnum.GREEN && cardBehind.Value != neededOutputCardValue[2]) break;
+                            //}
 
                             Turn turn = new Turn { FromColumn = col, FromRow = (byte)row, FromTop = false, ToTop = false };
 
@@ -272,8 +273,7 @@ namespace SHENZENSolitaire
                 else
                 {
                     int localTries = 0;
-                    Parallel.ForEach(turns, PARALLEL_OPTIONS, (t, loopState) =>
-                    //foreach (Turn t in turns)
+                    Parallel.ForEach(turns, PARALLEL_OPTIONS, (t, loopState) =>//foreach (Turn t in turns)                    
                     {
                         GameState newState = new GameState();
 
@@ -289,7 +289,7 @@ namespace SHENZENSolitaire
                         if (!newState.HasEquivaltentStack(path))
                         {
                             List<GameState> newPath = new List<GameState>(path) { newState };
-                            newPath = EvaluateState(newState.Field, newPath);
+                            newPath = this.EvaluateState(newState.Field, newPath);
                             if (newPath.Count > path.Count + 1)
                             {
                                 path = newPath;
@@ -306,13 +306,13 @@ namespace SHENZENSolitaire
         public List<GameState> FindSolution()
         {
             List<GameState> result = null;
-            List<Turn> turns = FindAllPossibleTurns(Field);
+            List<Turn> turns = FindAllPossibleTurns(this.Field);
 
             Parallel.ForEach(turns, PARALLEL_OPTIONS, (t, loopState) =>
             {
                 GameState initialGameState = new GameState();
-                initialGameState.MakeState(Field, t);
-                List<GameState> path = EvaluateState(initialGameState.Field, new List<GameState> { initialGameState });
+                initialGameState.MakeState(this.Field, t);
+                List<GameState> path = this.EvaluateState(initialGameState.Field, new List<GameState> { initialGameState });
 
                 if (path.Count > 1)
                 {

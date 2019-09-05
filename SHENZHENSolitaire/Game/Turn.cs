@@ -1,4 +1,4 @@
-﻿namespace SHENZENSolitaire
+﻿namespace SHENZENSolitaire.Game
 {
     public struct Turn
     {

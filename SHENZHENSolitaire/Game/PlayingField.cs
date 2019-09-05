@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SHENZENSolitaire
+namespace SHENZENSolitaire.Game
 {
     public class PlayingField
     {

@@ -1,6 +1,6 @@
-﻿using SHENZENSolitaire;
+﻿using SHENZENSolitaire.Game;
 
-namespace SHENZENSolitaire
+namespace SHENZENSolitaire.Actor
 {
     public static class PlayingFields
     {

@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SHENZENSolitaire
+namespace SHENZENSolitaire.Extractor
 {
     public class ScreenExtractor
     {
@@ -41,27 +41,31 @@ namespace SHENZENSolitaire
 
             int xBaseBase = 733;
             int yBaseBase = 579;
-
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 8; i++)
             {
-                int xBase = xBaseBase;
-                int yBase = yBaseBase + 31 * i;
-                colors += $"x: {xBase} y: {yBase} color: ";
-                double dr = 0, dg = 0, db = 0;
-                for (int x = xBase; x < xBase + 16; x++)
+                int xBase = xBaseBase + 152 * i;
+                for (int j = 0; j < 5; j++)
                 {
-                    for (int y = yBase; y < yBase + 16; y++)
+                    int yBase = yBaseBase + 31 * j;
+                    colors += $"x: {xBase} y: {yBase} color: ";
+                    double dr = 0, dg = 0, db = 0;
+                    for (int x = xBase; x < xBase + 16; x++)
                     {
-                        uint a = GetARGBAt(x, y);
-                        dr += ((a >> 0) & 0xff) / 256.0;
-                        dg += ((a >> 8) & 0xff) / 256.0;
-                        db += ((a >> 16) & 0xff) / 256.0;
+                        for (int y = yBase; y < yBase + 16; y++)
+                        {
+                            uint a = GetARGBAt(x, y);
+                            dr += ((a >> 0) & 0xff) / 256.0;
+                            dg += ((a >> 8) & 0xff) / 256.0;
+                            db += ((a >> 16) & 0xff) / 256.0;
+                        }
                     }
-                }
 
-                colors += $"{(uint)dr} {(uint)dg} {(uint)db}\r\n";
+                    colors += $"{(uint)dr} {(uint)dg} {(uint)db}\r\n";
+                } 
             }
 
+            int yTop = 315;
+            int xRose = 1301;
 
             return colors;
         }

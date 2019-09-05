@@ -1,4 +1,4 @@
-﻿namespace SHENZENSolitaire
+﻿namespace SHENZENSolitaire.Game
 {
     public enum SuitEnum : byte
     {

@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using SHENZENSolitaire.Game;
+using System.Collections.Generic;
 using System.Linq;
 
-namespace SHENZENSolitaire
+namespace SHENZENSolitaire.Actor
 {
-   public class GameState
+    public class GameState
     {
         public const byte TOP_FINGERPRINT_INDEX = PlayingField.COLUMNS_FIELD;
 
