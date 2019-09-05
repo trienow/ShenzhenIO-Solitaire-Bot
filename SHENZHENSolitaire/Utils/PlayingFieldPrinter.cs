@@ -44,10 +44,10 @@ namespace SHENZENSolitaire.Utils
             {
                 for (int col = 0; col < PlayingField.COLUMNS_FIELD; col++)
                 {
-                    if (row > rowsLut[col])
+                    if (row >= rowsLut[col])
                     {
                         SetConsoleColor(SuitEnum.EMPTY);
-                        Console.Write($"      ");
+                        Console.Write($"       ");
                     }
                     else
                     {
@@ -61,6 +61,8 @@ namespace SHENZENSolitaire.Utils
                 }
                 Console.WriteLine();
             }
+
+            Console.ForegroundColor = ConsoleColor.Gray;
         }
 
         private static void SetConsoleColor(SuitEnum suit)
