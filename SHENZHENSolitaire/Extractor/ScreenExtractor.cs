@@ -1,5 +1,6 @@
 ﻿using SHENZENSolitaire.Game;
 using SHENZENSolitaire.Utils;
+using System;
 using System.Threading.Tasks;
 
 namespace SHENZENSolitaire.Extractor
@@ -22,6 +23,8 @@ namespace SHENZENSolitaire.Extractor
             field.SetSlot(true, 4, ih.GetCardAt(xs[5], 315));
             field.SetSlot(true, 5, ih.GetCardAt(xs[6], 315));
             field.SetSlot(true, 6, ih.GetCardAt(xs[7], 315));
+
+            Console.WriteLine("Got Top. Now getting field...");
 
             Parallel.For(0, 8, (col) =>
             {

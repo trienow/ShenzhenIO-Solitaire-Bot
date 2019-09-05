@@ -44,7 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Extractor\ReferenceImages.cs" />
+    <Compile Include="Extractor\ImageHandler.cs" />
     <Compile Include="Player\GameState.cs" />
     <Compile Include="Utils\LimitedConcurrencyLevelTaskScheduler.cs" />
     <Compile Include="Player\Player.cs" />
