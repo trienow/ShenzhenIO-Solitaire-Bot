@@ -8,16 +8,6 @@ namespace SHENZENSolitaire.Extractor
     class ImageHandler
     {
         private const short ARRAY_LEN = 768; //16 * 16 * 3
-
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern IntPtr GetDesktopWindow();
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern IntPtr GetWindowDC(IntPtr window);
-        [DllImport("gdi32.dll", SetLastError = true)]
-        private static extern uint GetPixel(IntPtr dc, int x, int y);
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern int ReleaseDC(IntPtr window, IntPtr dc);
-
         private readonly Card[] cards = new Card[]
         {
             new Card(0, SuitEnum.EMPTY),
@@ -123,25 +113,27 @@ namespace SHENZENSolitaire.Extractor
 
         public Card GetCardAt(int xBase, int yBase)
         {
-            //Thanks to bitterblue: https://stackoverflow.com/a/24759418/7396282
-            IntPtr desk = GetDesktopWindow();
-            IntPtr dc = GetWindowDC(desk);
-
             byte[] colors = new byte[ARRAY_LEN];
 
-            short iByte = 0;
-            for (int x = xBase; x < xBase + 16; x++)
+            using (Bitmap bmp = new Bitmap(16, 16))
             {
-                for (int y = yBase; y < yBase + 16; y++)
+                using (Graphics graphics = Graphics.FromImage(bmp))
                 {
-                    uint a = GetPixel(dc, x, y);
-                    colors[iByte++] = (byte)((a >> 0) & 0xff);
-                    colors[iByte++] = (byte)((a >> 8) & 0xff);
-                    colors[iByte++] = (byte)((a >> 16) & 0xff);
+                    graphics.CopyFromScreen(xBase, yBase, 0, 0, new Size(16, 16));
+                }
+
+                short iByte = 0;
+                for (short x = 0; x < 16; x++)
+                {
+                    for (short y = 0; y < 16; y++)
+                    {
+                        Color c = bmp.GetPixel(x, y);
+                        colors[iByte++] = c.R;
+                        colors[iByte++] = c.G;
+                        colors[iByte++] = c.B;
+                    }
                 }
             }
-
-            ReleaseDC(desk, dc);
 
             return FindBestCard(colors);
         }

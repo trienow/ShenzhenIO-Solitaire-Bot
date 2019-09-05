@@ -2,6 +2,7 @@
 using SHENZENSolitaire.Extractor;
 using SHENZENSolitaire.Game;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace SHENZENSolitaire
@@ -10,12 +11,16 @@ namespace SHENZENSolitaire
     {
         static void Main(string[] args)
         {
-            Thread.Sleep(5000);
+            Console.WriteLine("Press ENTER when the field can be extracted!");
+            Console.Read();
             Console.WriteLine("Grabbing field...");
             PlayingField field = ScreenExtractor.ExtractField();
+            Console.WriteLine("Ok?");
             Console.Read();
+            Console.Read();
+
             Player p = new Player(field);
-            p.FindSolution();
+            List<GameState> moves = p.FindSolution();
         }
     }
 }
