@@ -19,7 +19,23 @@ namespace SHENZENSolitaire
             Console.Read();
 
             Player p = new Player(field);
-            List<GameState> moves = p.FindSolution();
+            GameState finalState = p.FindSolution();
+
+            if (finalState != null)
+            {
+                GameState[] moves = GameState.Linearize(finalState);
+                foreach (GameState move in moves)
+                {
+                    Console.WriteLine(move);
+                }
+            }
+            else
+            {
+                Console.WriteLine("Nix gefunden!");
+            }
+
+            Console.Read();
+            Console.Read();
         }
     }
 }

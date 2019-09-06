@@ -49,7 +49,6 @@
     <Compile Include="Player\GameState.cs" />
     <Compile Include="Utils\LimitedConcurrencyLevelTaskScheduler.cs" />
     <Compile Include="Player\Player.cs" />
-    <Compile Include="Player\PlayingFields.cs" />
     <Compile Include="Extractor\ScreenExtractor.cs" />
     <Compile Include="Game\Turn.cs" />
     <Compile Include="Game\Card.cs" />

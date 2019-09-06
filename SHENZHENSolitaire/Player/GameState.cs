@@ -1,70 +1,121 @@
 ﻿using SHENZENSolitaire.Game;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace SHENZENSolitaire.Actor
 {
     public class GameState
     {
-        public const byte TOP_FINGERPRINT_INDEX = PlayingField.COLUMNS_FIELD;
-
+        public GameState PreviousState { get; set; } = null; //<- Used to chain the states
+        public PlayingField FieldResult { get; set; } //<- Used to generate the next state
+        public int PathLength { get; private set; } = 0;
+        public Turn ExecutedTurn { get; set; } //<- Used to generate the next field
+        public Card MovedCard { get; set; } = Card.EMPTY; //<- Decor
+        public int RemainingCards { get => FieldResult.RemainingCards; } //<- Convenience 
         public byte[][] Fingerprints { get; set; }
-        public Turn PrecedingTurn { get; set; }
-        public PlayingField Field { get; set; }
 
-        public Card MovedCard { get; private set; } = Card.EMPTY;
-        public int Tries { get; set; }
-        public int TotalPossibilities { get; set; }
-
-        public void MakeState(PlayingField currentField, Turn nextTurn)
+        public GameState(PlayingField initialField)
         {
-            if (nextTurn.MergeDragons == default(SuitEnum) && !nextTurn.Finished)
-            {
-                if (nextTurn.FromTop)
-                {
-                    MovedCard = currentField[nextTurn.FromColumn];
-                }
-                else
-                {
-                    MovedCard = currentField[nextTurn.FromColumn, nextTurn.FromRow];
-                }
-            }
-
-            PrecedingTurn = nextTurn;
-            Field = currentField.PerformTurn(nextTurn);
-            Fingerprints = Field.MakeFingerprints();
+            PreviousState = null;
+            FieldResult = initialField;
         }
 
-        public bool HasEquivaltentStack(List<GameState> states)
+        public GameState(GameState previousState, Turn turn)
         {
-            if (PrecedingTurn.ToTop)
+            PreviousState = previousState;
+            ExecutedTurn = turn;
+
+            if (turn.MergeDragons == default)
             {
-                byte col = TOP_FINGERPRINT_INDEX;
-                foreach (GameState state in states)
+                MovedCard = turn.FromTop ? previousState.FieldResult[turn.FromColumn] : previousState.FieldResult[turn.FromColumn, turn.FromRow];
+            }
+
+            PathLength = previousState.PathLength + 1;
+        }
+
+        /// <summary>
+        /// Performs a <see cref="Turn"/> and returns the amount of <see cref="Card"/>s on the <see cref="PlayingField"/>.
+        /// </summary>
+        /// <returns>The amount of <see cref="Card"/>s left on the <see cref="PlayingField"/></returns>
+        public int PerformTurn()
+        {
+            FieldResult = PreviousState.FieldResult.PerformTurn(ExecutedTurn);
+            Fingerprints = FieldResult.MakeFingerprints();
+            return RemainingCards;
+        }
+
+        /// <summary>
+        /// Tests, if the just generated stack has not been generated before!
+        /// </summary>
+        /// <returns></returns>
+        public bool IsStateUnique()
+        {
+            bool result = true;
+            GameState prevState = this.PreviousState;
+
+            if (ExecutedTurn.ToTop)
+            {
+                byte col = PlayingField.COLUMNS_FIELD;
+                byte[] stack = Fingerprints[col];
+                while (prevState.PreviousState != null)
                 {
-                    if (state.Fingerprints[col].SequenceEqual(Fingerprints[col]))
+                    if (stack.SequenceEqual(prevState.Fingerprints[col]))
                     {
-                        return true;
+                        result = false;
+                        break;
                     }
+
+                    prevState = prevState.PreviousState;
                 }
             }
-            else
+            else if(ExecutedTurn.MergeDragons == default)
             {
-                byte[] targetFingerprint = Fingerprints[PrecedingTurn.ToColumn];
-                foreach (GameState state in states)
+                byte[] stack = Fingerprints[ExecutedTurn.ToColumn]; //<- Compare the resulting stack with all other field stacks
+                while (prevState.PreviousState != null)
                 {
-                    for (byte col = 0; col < PlayingField.COLUMNS_FIELD; col++)
+                    for (int col = 0; col < PlayingField.COLUMNS_FIELD; col++)
                     {
-                        if (targetFingerprint.SequenceEqual(state.Fingerprints[col]))
+                        if (stack.SequenceEqual(prevState.Fingerprints[col]))
                         {
-                            return true;
+                            result = false;
+                            break;
                         }
                     }
 
+                    prevState = prevState.PreviousState;
                 }
             }
 
-            return false;
+            return result;
+        }
+
+        public override string ToString()
+        {
+            if (ExecutedTurn.MergeDragons == default)
+            {
+                return $"[{PathLength}]: {MovedCard} {ExecutedTurn}";
+            }
+            else
+            {
+                return $"[{PathLength}]: {ExecutedTurn}";
+            }
+
+        }
+
+        /// <summary>
+        /// Turns the linked <see cref="GameState"/>s into a linear array
+        /// </summary>
+        /// <param name="state">The state to flatten</param>
+        /// <returns>An array of the linked <see cref="GameState"/>s</returns>
+        public static GameState[] Linearize(GameState state)
+        {
+            GameState[] linearStates = new GameState[state.PathLength + 1];
+            while (state != null)
+            {
+                linearStates[state.PathLength] = state;
+                state = state.PreviousState;
+            }
+
+            return linearStates;
         }
     }
 }
