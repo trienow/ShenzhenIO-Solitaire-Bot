@@ -30,10 +30,6 @@ namespace SHENZENSolitaire.Extractor
                     {
                         bestExCard = exCard;
                     }
-                    else
-                    {
-                        break;
-                    }
                 }
 
                 field.SetSlot(true, 7, bestExCard); //<- The playing field will place the card in the correct slot
