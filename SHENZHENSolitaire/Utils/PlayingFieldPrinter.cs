@@ -8,7 +8,7 @@ namespace SHENZENSolitaire.Utils
     {
         public static void PrintTurn(Turn turn)
         {
-            if (turn.MergeDragons == default)
+            if (turn.MergeDragons != default)
             {
                 SetConsoleColor(turn.MergeDragons);
                 Console.Write($"Merge {turn.MergeDragons} Dragons");
@@ -17,11 +17,11 @@ namespace SHENZENSolitaire.Utils
             {
                 if (turn.FromTop)
                 {
-                    Console.Write($"From buffer slot {turn.FromColumn + 1} move to ");
+                    Console.Write($"Buffer {turn.FromColumn + 1} to ");
                 }
                 else
                 {
-                    Console.Write($"From column {turn.FromColumn + 1}, row {turn.FromRow + 1} to ");
+                    Console.Write($"Column {turn.FromColumn + 1} to ");
                 }
 
                 if (turn.ToTop)
@@ -37,7 +37,9 @@ namespace SHENZENSolitaire.Utils
                 }
                 else
                 {
-                    Console.Write($"column {turn.ToColumn + 1} on the field");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.Write($"column {turn.ToColumn + 1}");
+                    Console.ForegroundColor = ConsoleColor.Gray;
                 }
             }
 
@@ -49,17 +51,17 @@ namespace SHENZENSolitaire.Utils
             SetConsoleColor(card.Suit);
             Console.Write($"  {GetPrefix(card.Suit)}{card.Value}  ");
             Console.ForegroundColor = ConsoleColor.Gray;
+            Console.BackgroundColor = ConsoleColor.Black;
         }
 
         public static void Print(PlayingField field)
         {
             for (int col = 0; col < PlayingField.COLUMNS_TOP; col++)
             {
-
                 if (col == 3)
                 {
                     SetConsoleColor(SuitEnum.EMPTY);
-                    Console.Write("  ");
+                    Console.Write("     ");
                 }
 
                 Card c = field[col];
@@ -70,7 +72,7 @@ namespace SHENZENSolitaire.Utils
 
                 if (col == 3)
                 {
-                    Console.Write(" ");
+                    Console.Write("  ");
                 }
             }
 

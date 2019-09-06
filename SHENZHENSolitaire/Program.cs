@@ -23,6 +23,7 @@ namespace SHENZENSolitaire
 
             if (finalState != null)
             {
+                Console.WriteLine($"Lösung in {finalState.PathLength} Schritten!");
                 GameState[] moves = GameState.Linearize(finalState);
 
                 for (int i = 0; i < moves.Length; i++)
