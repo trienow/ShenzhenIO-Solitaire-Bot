@@ -1,5 +1,5 @@
 ﻿using SHENZENSolitaire.Actor;
-using SHENZENSolitaire.Extractor;
+using SHENZENSolitaire.ScreenHandler;
 using SHENZENSolitaire.Game;
 using SHENZENSolitaire.Utils;
 using System;

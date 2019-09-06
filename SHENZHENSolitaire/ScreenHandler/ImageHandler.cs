@@ -2,7 +2,7 @@
 using System;
 using System.Drawing;
 
-namespace SHENZENSolitaire.Extractor
+namespace SHENZENSolitaire.ScreenHandler
 {
     class ImageHandler
     {

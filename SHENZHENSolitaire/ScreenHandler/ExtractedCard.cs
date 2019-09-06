@@ -1,6 +1,6 @@
 ﻿using SHENZENSolitaire.Game;
 
-namespace SHENZENSolitaire.Extractor
+namespace SHENZENSolitaire.ScreenHandler
 {
     class ExtractedCard : Card
     {

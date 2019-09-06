@@ -2,7 +2,7 @@
 using SHENZENSolitaire.Utils;
 using System.Threading.Tasks;
 
-namespace SHENZENSolitaire.Extractor
+namespace SHENZENSolitaire.ScreenHandler
 {
     public class ScreenExtractor
     {
