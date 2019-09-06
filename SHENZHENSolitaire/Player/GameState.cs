@@ -67,7 +67,7 @@ namespace SHENZENSolitaire.Actor
                     prevState = prevState.PreviousState;
                 }
             }
-            else if(ExecutedTurn.MergeDragons == default)
+            else if (ExecutedTurn.MergeDragons == default)
             {
                 byte[] stack = Fingerprints[ExecutedTurn.ToColumn]; //<- Compare the resulting stack with all other field stacks
                 while (prevState.PreviousState != null)

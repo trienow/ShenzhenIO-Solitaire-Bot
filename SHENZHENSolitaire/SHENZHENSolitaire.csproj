@@ -47,6 +47,7 @@
     <Compile Include="Extractor\ExtractedCard.cs" />
     <Compile Include="Extractor\ImageHandler.cs" />
     <Compile Include="Player\GameState.cs" />
+    <Compile Include="Utils\GameStatePrinter.cs" />
     <Compile Include="Utils\LimitedConcurrencyLevelTaskScheduler.cs" />
     <Compile Include="Player\Player.cs" />
     <Compile Include="Extractor\ScreenExtractor.cs" />

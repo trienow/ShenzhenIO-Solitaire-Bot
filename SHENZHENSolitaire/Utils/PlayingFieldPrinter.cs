@@ -6,6 +6,51 @@ namespace SHENZENSolitaire.Utils
 {
     public class PlayingFieldPrinter
     {
+        public static void PrintTurn(Turn turn)
+        {
+            if (turn.MergeDragons == default)
+            {
+                SetConsoleColor(turn.MergeDragons);
+                Console.Write($"Merge {turn.MergeDragons} Dragons");
+            }
+            else
+            {
+                if (turn.FromTop)
+                {
+                    Console.Write($"From buffer slot {turn.FromColumn + 1} move to ");
+                }
+                else
+                {
+                    Console.Write($"From column {turn.FromColumn + 1}, row {turn.FromRow + 1} to ");
+                }
+
+                if (turn.ToTop)
+                {
+                    if (turn.ToColumn < 3)
+                    {
+                        Console.Write($"buffer slot {turn.ToColumn + 1}.");
+                    }
+                    else
+                    {
+                        Console.Write($"an output slot.");
+                    }
+                }
+                else
+                {
+                    Console.Write($"column {turn.ToColumn + 1} on the field");
+                }
+            }
+
+            Console.ForegroundColor = ConsoleColor.Gray;
+        }
+
+        public static void PrintCard(Card card)
+        {
+            SetConsoleColor(card.Suit);
+            Console.Write($"  {GetPrefix(card.Suit)}{card.Value}  ");
+            Console.ForegroundColor = ConsoleColor.Gray;
+        }
+
         public static void Print(PlayingField field)
         {
             for (int col = 0; col < PlayingField.COLUMNS_TOP; col++)
@@ -18,8 +63,7 @@ namespace SHENZENSolitaire.Utils
                 }
 
                 Card c = field[col];
-                SetConsoleColor(c.Suit);
-                Console.Write($"  {GetPrefix(c.Suit)}{c.Value}  ");
+                PrintCard(c);
 
                 SetConsoleColor(SuitEnum.EMPTY);
                 Console.Write(" ");
@@ -52,8 +96,7 @@ namespace SHENZENSolitaire.Utils
                     else
                     {
                         Card c = field[col, row];
-                        SetConsoleColor(c.Suit);
-                        Console.Write($"  {GetPrefix(c.Suit)}{c.Value}  ");
+                        PrintCard(c);
 
                         SetConsoleColor(SuitEnum.EMPTY);
                         Console.Write(" ");

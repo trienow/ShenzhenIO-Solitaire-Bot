@@ -348,7 +348,7 @@ namespace SHENZENSolitaire.Actor
                 GameState currentState = states.Dequeue(); //Get a new state to evaluate
 
                 //if (currentState.RemainingCards > maximumCards) continue;
-                if (currentState.RemainingCards - Math.Min(short.MaxValue / (float)(states.Count + 1), 5) > lowestCardCount) continue;
+                if (currentState.RemainingCards - Math.Min(short.MaxValue / (float)(states.Count + 1), 10) > lowestCardCount) continue;
 
                 List<Turn> turns = FindTurns(currentState.FieldResult);
                 foreach (Turn turn in turns)

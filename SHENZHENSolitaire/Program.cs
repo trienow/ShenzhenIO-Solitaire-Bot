@@ -1,14 +1,14 @@
 ﻿using SHENZENSolitaire.Actor;
 using SHENZENSolitaire.Extractor;
 using SHENZENSolitaire.Game;
+using SHENZENSolitaire.Utils;
 using System;
-using System.Collections.Generic;
 
 namespace SHENZENSolitaire
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             Console.WriteLine("Press ENTER when the field can be extracted!");
             Console.Read();
@@ -24,14 +24,18 @@ namespace SHENZENSolitaire
             if (finalState != null)
             {
                 GameState[] moves = GameState.Linearize(finalState);
-                foreach (GameState move in moves)
+
+                for (int i = 0; i < moves.Length; i++)
                 {
-                    Console.WriteLine(move);
+                    GameStatePrinter.Print(moves[i]);
+                    string feedback = Console.ReadLine();
+
+                    if (feedback == "b" && i > 0) i -= 2;
                 }
             }
             else
             {
-                Console.WriteLine("Nix gefunden!");
+                Console.WriteLine("Nichts gefunden!");
             }
 
             Console.Read();
