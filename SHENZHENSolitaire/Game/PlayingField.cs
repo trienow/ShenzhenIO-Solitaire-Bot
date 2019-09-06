@@ -94,6 +94,29 @@ namespace SHENZENSolitaire.Game
             new Card(9, SuitEnum.BLACK),
         };
 
+        public int RemainingCards
+        {
+            get
+            {
+                int count = 0;
+                for (byte col = 0; col < COLUMNS_BUFFER; col++)
+                {
+                    SuitEnum suit = topArea[col].Suit;
+                    if (suit != SuitEnum.EMPTY && suit != SuitEnum.BLOCKED)
+                    {
+                        count++;
+                    }
+                }
+
+                for (byte col = 0; col < COLUMNS_FIELD; col++)
+                {
+                    count += GetColumnLength(col);
+                }
+
+                return count;
+            }
+        }
+
         /// <summary>
         /// Gets a card in the specified column of the top part of the playing field
         /// </summary>
@@ -284,9 +307,9 @@ namespace SHENZENSolitaire.Game
         /// <returns>True, when the turn is allows by the rules</returns>
         public bool IsTurnAllowed(Turn turn)
         {
-            bool allowed = true; //<- Let's start off allowing everything and going from there
+            bool allowed; //<- Let's start off allowing everything and going from there
 
-            if (turn.MergeDragons == default(SuitEnum))
+            if (turn.MergeDragons == default)
             {
                 byte toCol = turn.ToColumn;
                 byte fromCol = turn.FromColumn;
@@ -295,7 +318,7 @@ namespace SHENZENSolitaire.Game
                 int cardBunch = this.fieldArea[fromCol].Count - turn.FromRow;
 
                 allowed = fromCard.Suit != SuitEnum.BLOCKED && fromCard.Suit != SuitEnum.EMPTY; //<- If it is not a system-suit
-                allowed = turn.FromTop && fromCol < 3 || this.IsMovable(fromCol, turn.FromRow); //<- If it is movable at all
+                allowed = allowed && (turn.FromTop && fromCol < 3 || this.IsMovable(fromCol, turn.FromRow)); //<- If it is movable at all
 
                 if (allowed && turn.ToTop)
                 {
@@ -476,7 +499,7 @@ namespace SHENZENSolitaire.Game
         {
             PlayingField field = new PlayingField(this);
 
-            if (turn.MergeDragons == default(SuitEnum))
+            if (turn.MergeDragons == default)
             {
                 int toCol = turn.ToColumn;
                 int fromCol = turn.FromColumn;
@@ -517,15 +540,6 @@ namespace SHENZENSolitaire.Game
             }
 
             return field;
-        }
-
-        /// <summary>
-        /// Indicates a finished game
-        /// </summary>
-        /// <returns>Returns true, when all output slots have been filled with the right cards</returns>
-        public bool IsGameOver()
-        {
-            return this.topArea[3].Suit == SuitEnum.ROSE && this.topArea[4].Value == 9 && this.topArea[5].Value == 9 && this.topArea[6].Value == 9;
         }
 
         /// <summary>
