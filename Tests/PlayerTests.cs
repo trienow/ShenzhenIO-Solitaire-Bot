@@ -10,14 +10,41 @@ namespace Tests
         [TestMethod]
         public void FindAllPossibleTurns()
         {
-            Player.FindAllPossibleTurns(PlayingFields.A1).Count.Should().BePositive();
+            Player.FindTurns(PlayingFields.A1).Count.Should().BePositive();
         }
 
+        /// <summary>
+        /// Ez
+        /// </summary>
         [TestMethod]
-        public void FindASolution()
+        public void FindSolutionA2()
         {
             Player p = new Player(PlayingFields.A2);
-            p.FindSolution().Count.Should().BeGreaterThan(5);
+            p.FindSolution().PathLength.Should().BeGreaterThan(5);
+        }
+
+        /// <summary>
+        /// Ez
+        /// </summary>
+        [TestMethod]
+        public void FindSolutionA3()
+        {
+            Player p = new Player(PlayingFields.A3);
+
+            GameState solution = p.FindSolution();
+            solution.PathLength.Should().BePositive();
+        }
+
+        /// <summary>
+        /// With a dragon-merge
+        /// </summary>
+        [TestMethod]
+        public void FindSolutionA4()
+        {
+            Player p = new Player(PlayingFields.A3);
+
+            GameState solution = p.FindSolution();
+            solution.PathLength.Should().BePositive();
         }
     }
 }
