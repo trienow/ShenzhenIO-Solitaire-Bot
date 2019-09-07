@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using System.Threading.Tasks.Schedulers;
 
 namespace SHENZENSolitaire.Actor
 {
@@ -42,6 +44,7 @@ namespace SHENZENSolitaire.Actor
             Card.DRAGON_GREEN,
             Card.DRAGON_BLACK
         };
+        private static readonly ParallelOptions PARALLEL_OPTIONS = new ParallelOptions { MaxDegreeOfParallelism = 8 };
 
         public int Tries { get; set; } = 0;
         //private static readonly LimitedConcurrencyLevelTaskScheduler LIMITED_TASK_SCHED = new LimitedConcurrencyLevelTaskScheduler(8);
@@ -342,45 +345,60 @@ namespace SHENZENSolitaire.Actor
             states.Enqueue(new GameState(Field));
             int lowestCardCount = 41;
             GameState finalState = null;
+            float thresholdNumerator = 524288f;
 
             while (states.Count > 0)
             {
-                GameState currentState = states.Dequeue(); //Get a new state to evaluate
-
                 int stateCount = states.Count + 1;
-                if (stateCount > 4194304 && currentState.RemainingCards > lowestCardCount) continue; //<- Out of Memory Saver
+                float threshold = Math.Max(Math.Min(thresholdNumerator / stateCount, 20), 2);
 
-                float threshold = Math.Max(Math.Min(524288f / stateCount, 20), 2);
-                if (currentState.RemainingCards - threshold > lowestCardCount) continue;
-
-                List<Turn> turns = FindTurns(currentState.FieldResult);
-                foreach (Turn turn in turns)
+                Queue<GameState> nextStates = new Queue<GameState>(states.Count);
+                Parallel.ForEach(states, PARALLEL_OPTIONS, (currentState, loopState) =>
                 {
-                    Tries++;
-                    GameState newState = new GameState(currentState, turn);
-                    int remainingCards = newState.PerformTurn();
-                    if (remainingCards == 0)
-                    {
-                        finalState = newState;
-                        states.Clear();
-                        break;
-                    }
-                    else if (newState.IsStateUnique())
-                    {
-                        states.Enqueue(newState);
-                    }
+                    if (stateCount > 2097152 && currentState.RemainingCards > lowestCardCount) return; //<- Out of Memory Saver
+                    if (currentState.RemainingCards - threshold > lowestCardCount) return;
 
-                    if (remainingCards < lowestCardCount)
+                    List<Turn> turns = FindTurns(currentState.FieldResult);
+                    foreach (Turn turn in turns)
                     {
-                        lowestCardCount = remainingCards;
-                        Console.WriteLine($"Cards left to distribute: {lowestCardCount,-2}  Threshold: {lowestCardCount + (int)threshold,-2}  Current States: {stateCount,-5}  Total Tries: {Tries}");
+                        lock (this)
+                        {
+                            Tries++;
+                        }
+
+                        GameState newState = new GameState(currentState, turn);
+                        int remainingCards = newState.PerformTurn();
+                        if (remainingCards == 0)
+                        {
+                            finalState = newState;
+                            break;
+                        }
+                        else if (newState.IsStateUnique())
+                        {
+                            lock (this)
+                            {
+                                nextStates.Enqueue(newState);
+
+                                if (remainingCards < lowestCardCount)
+                                {
+                                    lowestCardCount = remainingCards;
+
+                                    if (lowestCardCount < 12)
+                                    {
+                                        thresholdNumerator = 131072f;
+                                    }
+
+                                    Console.WriteLine($"Cards left to distribute: {lowestCardCount,-2}  Threshold: {lowestCardCount + (int)threshold,-2}  Current States: {stateCount,-5}  Total Tries: {Tries}");
+                                }
+                            }
+                        }
                     }
-                }
+                });
+
+                states = nextStates;
             }
 
-#pragma warning disable IDE0059 // Unnötige Zuweisung eines Werts.
-            states = new Queue<GameState>(); //<- Clears memory
-#pragma warning restore IDE0059 // Unnötige Zuweisung eines Werts.
+            states.TrimExcess();
 
             return finalState;
         }
