@@ -347,8 +347,10 @@ namespace SHENZENSolitaire.Actor
             {
                 GameState currentState = states.Dequeue(); //Get a new state to evaluate
 
-                //if (currentState.RemainingCards > maximumCards) continue;
-                float threshold = Math.Max(Math.Min(short.MaxValue / (float)(states.Count + 1), 20), 3);
+                int stateCount = states.Count + 1;
+                if (stateCount > 4194304 && currentState.RemainingCards > lowestCardCount) continue; //<- Out of Memory Saver
+
+                float threshold = Math.Max(Math.Min(524288f / stateCount, 20), 2);
                 if (currentState.RemainingCards - threshold > lowestCardCount) continue;
 
                 List<Turn> turns = FindTurns(currentState.FieldResult);
@@ -371,10 +373,14 @@ namespace SHENZENSolitaire.Actor
                     if (remainingCards < lowestCardCount)
                     {
                         lowestCardCount = remainingCards;
-                        Console.WriteLine($"Cards left to distribute: {lowestCardCount,2}   Total Tries: {Tries}");
+                        Console.WriteLine($"Cards left to distribute: {lowestCardCount,-2}  Threshold: {lowestCardCount + (int)threshold,-2}  Current States: {stateCount,-5}  Total Tries: {Tries}");
                     }
                 }
             }
+
+#pragma warning disable IDE0059 // Unnötige Zuweisung eines Werts.
+            states = new Queue<GameState>(); //<- Clears memory
+#pragma warning restore IDE0059 // Unnötige Zuweisung eines Werts.
 
             return finalState;
         }
