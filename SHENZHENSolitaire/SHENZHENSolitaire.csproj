@@ -48,6 +48,10 @@
     <Compile Include="ScreenHandler\GameExecuter.cs" />
     <Compile Include="ScreenHandler\ImageHandler.cs" />
     <Compile Include="Actor\GameState.cs" />
+    <Compile Include="ScreenHandler\MouseEventFlags.cs" />
+    <Compile Include="ScreenHandler\Mouse.cs" />
+    <Compile Include="ScreenHandler\Point.cs" />
+    <Compile Include="ScreenHandler\Vec2.cs" />
     <Compile Include="Utils\GameStatePrinter.cs" />
     <Compile Include="Utils\LimitedConcurrencyLevelTaskScheduler.cs" />
     <Compile Include="Actor\Player.cs" />
