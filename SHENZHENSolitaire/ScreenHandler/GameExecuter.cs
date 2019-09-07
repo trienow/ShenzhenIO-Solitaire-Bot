@@ -1,7 +1,5 @@
 ﻿using SHENZENSolitaire.Actor;
 using SHENZENSolitaire.Game;
-using System;
-using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace SHENZENSolitaire.ScreenHandler
@@ -38,6 +36,10 @@ namespace SHENZENSolitaire.ScreenHandler
         {
             Mouse.ClickTo(1759, 1113);
             Thread.Sleep(7000);
+        }
+        public static void FocusWindow()
+        {
+            Mouse.ClickTo(1245, 383);
         }
     }
 }
