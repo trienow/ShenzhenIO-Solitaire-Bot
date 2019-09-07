@@ -44,13 +44,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Extractor\ExtractedCard.cs" />
-    <Compile Include="Extractor\ImageHandler.cs" />
-    <Compile Include="Player\GameState.cs" />
+    <Compile Include="ScreenHandler\ExtractedCard.cs" />
+    <Compile Include="ScreenHandler\GameExecuter.cs" />
+    <Compile Include="ScreenHandler\ImageHandler.cs" />
+    <Compile Include="Actor\GameState.cs" />
     <Compile Include="Utils\GameStatePrinter.cs" />
     <Compile Include="Utils\LimitedConcurrencyLevelTaskScheduler.cs" />
-    <Compile Include="Player\Player.cs" />
-    <Compile Include="Extractor\ScreenExtractor.cs" />
+    <Compile Include="Actor\Player.cs" />
+    <Compile Include="ScreenHandler\ScreenExtractor.cs" />
     <Compile Include="Game\Turn.cs" />
     <Compile Include="Game\Card.cs" />
     <Compile Include="Game\PlayingField.cs" />

@@ -371,7 +371,7 @@ namespace SHENZENSolitaire.Actor
                     if (remainingCards < lowestCardCount)
                     {
                         lowestCardCount = remainingCards;
-                        Console.WriteLine("Cards left to distribute: " + lowestCardCount);
+                        Console.WriteLine($"Cards left to distribute: {lowestCardCount,2}   Total Tries: {Tries}");
                     }
                 }
             }
