@@ -377,6 +377,7 @@ namespace SHENZENSolitaire.Actor
                         if (remainingCards == 0)
                         {
                             finalState = newState;
+                            loopState.Break();
                             break;
                         }
                         else if (newState.IsStateUnique())
@@ -407,7 +408,6 @@ namespace SHENZENSolitaire.Actor
                 states = nextStates;
             }
 
-            states = null; //<- Force memory cleanup
             return finalState;
         }
     }

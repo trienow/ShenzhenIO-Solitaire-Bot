@@ -7,7 +7,7 @@ namespace SHENZENSolitaire.Utils
     {
         public static void Print(GameState state)
         {
-            Console.Write($"Schritt {state.PathLength}: ");
+            Console.Write($"Step {state.PathLength}: ");
 
             if (state.PreviousState != null)
             {
