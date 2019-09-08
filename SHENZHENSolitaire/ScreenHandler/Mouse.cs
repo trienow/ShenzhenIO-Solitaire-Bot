@@ -39,7 +39,7 @@ namespace SHENZENSolitaire.ScreenHandler
             Vec2 currPos = startPos;
             Vec2 diff = new Vec2(x, y) - currPos;
 
-            int steps = (int)(diff.MaxValue() / 3);
+            int steps = (int)(diff.MaxValue() / 4);
 
             if (steps > 0)
             {
