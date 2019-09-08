@@ -1,12 +1,15 @@
-﻿namespace SHENZENSolitaire.Game
+﻿using System;
+
+namespace SHENZENSolitaire.Game
 {
-    public class Card
+    public class Card : IEquatable<Card>, IComparable<Card>
     {
         public static readonly Card DRAGON_RED = new Card(suit: SuitEnum.RED);
         public static readonly Card DRAGON_GREEN = new Card(suit: SuitEnum.GREEN);
         public static readonly Card DRAGON_BLACK = new Card(suit: SuitEnum.BLACK);
         public static readonly Card BLOCKED = new Card(suit: SuitEnum.BLOCKED);
         public static readonly Card EMPTY = new Card(suit: SuitEnum.EMPTY);
+        public static readonly Card ROSE = new Card(suit: SuitEnum.ROSE);
 
         /// <summary>
         /// 0 - Dragon
@@ -56,6 +59,23 @@
         {
             return new Card((byte)(packedValue & 0b1111), (SuitEnum)(packedValue >> 4));
         }
+
+        public int CompareTo(Card other)
+        {
+            int result = Value - other.Value;
+
+            if (result == 0)
+            {
+                result = Suit - other.Suit;
+            }
+
+            return result;
+        }
+
+        public static bool operator >(Card a, Card b) => a is Card && b is Card && a.CompareTo(b) > 0;
+        public static bool operator <(Card a, Card b) => a is Card && b is Card && a.CompareTo(b) < 0;
+        public static bool operator >=(Card a, Card b) => a is Card && b is Card && (a.Equals(b) || a.CompareTo(b) > 0);
+        public static bool operator <=(Card a, Card b) => a is Card && b is Card && (a.Equals(b) || a.CompareTo(b) < 0);
 
         public static bool operator ==(Card a, Card b) => a is Card && b is Card && a.Equals(b);
 
