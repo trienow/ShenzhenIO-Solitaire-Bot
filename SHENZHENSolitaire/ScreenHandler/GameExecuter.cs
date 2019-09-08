@@ -1,5 +1,6 @@
 ﻿using SHENZENSolitaire.Actor;
 using SHENZENSolitaire.Game;
+using System;
 using System.Threading;
 
 namespace SHENZENSolitaire.ScreenHandler
@@ -11,13 +12,17 @@ namespace SHENZENSolitaire.ScreenHandler
             Turn turn = state.ExecutedTurn;
             if (turn.MergeDragons == default)
             {
-                if (turn.ToTop && turn.ToColumn > 2)
-                    Thread.Sleep(500);
+                if (!turn.ToTop || turn.ToColumn < 3 || state.FieldResult.CanStackAnythingOn(state.MovedCard))
+                {
+                    Vec2 from = ScreenExtractor.TranslateSlotToPos(turn.FromTop, turn.FromColumn, turn.FromRow, state.MovedCard);
+                    Vec2 to = ScreenExtractor.TranslateSlotToPos(turn.ToTop, turn.ToColumn, 5, state.MovedCard);
 
-                Vec2 from = ScreenExtractor.TranslateSlotToPos(turn.FromTop, turn.FromColumn, turn.FromRow, state.MovedCard);
-                Vec2 to = ScreenExtractor.TranslateSlotToPos(turn.ToTop, turn.ToColumn, 5, state.MovedCard);
-
-                Mouse.DragFromTo(from.XInt, from.YInt, to.XInt, to.YInt);
+                    Mouse.DragFromTo(from.XInt, from.YInt, to.XInt, to.YInt);
+                }
+                else
+                {
+                    Console.WriteLine("AUTO");
+                }
             }
             else
             {
@@ -29,7 +34,7 @@ namespace SHENZENSolitaire.ScreenHandler
                 }
             }
 
-            Thread.Sleep(1000);
+            Thread.Sleep(500);
         }
 
         public static void NewGame()
