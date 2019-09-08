@@ -358,6 +358,48 @@ namespace SHENZENSolitaire.Game
         }
 
         /// <summary>
+        /// Tests if any other <see cref="Card"/> in the game (excluding the output) can be put on top of the given <see cref="Card"/>
+        /// </summary>
+        /// <param name="onCard">The <see cref="Card"/> to try and stack something on</param>
+        /// <returns>Returns <see langword="true"/> when some other card can be stacked on the given <see cref="Card"/></returns>
+        public bool CanStackAnythingOn(Card onCard)
+        {
+            bool result = false;
+
+            if (onCard.Value > 2)
+            {
+                for (byte col = 0; col < COLUMNS_BUFFER; col++)
+                {
+                    Card c = topArea[col];
+                    if (c.Value + 1 == onCard.Value && c.Suit != onCard.Suit)
+                    {
+                        result = true;
+                        break;
+                    }
+                }
+
+                if (!result)
+                {
+                    for (byte col = 0; col < COLUMNS_FIELD; col++)
+                    {
+                        int rows = GetColumnLength(col);
+                        for (byte row = 0; row < rows; row++)
+                        {
+                            Card c = fieldArea[col][row];
+                            if (c.Value + 1 == onCard.Value && c.Suit != onCard.Suit)
+                            {
+                                result = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// Returns <see langword="true"/>, when dragons are available for merging
         /// </summary>
         /// <param name="color">The dragon color to search for</param>

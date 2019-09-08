@@ -53,5 +53,23 @@ namespace Tests
             PlayingField p = new PlayingField(pack);
             p.MakeFingerprint().Should().BeEquivalentTo(pack);
         }
+
+        [TestMethod]
+        public void CanStackOn()
+        {
+            PlayingField field = PlayingFields.A4;
+            field.CanStackAnythingOn(new Card(5, SuitEnum.GREEN)).Should().BeFalse();
+            field.CanStackAnythingOn(new Card(6, SuitEnum.BLACK)).Should().BeTrue();
+            field.CanStackAnythingOn(Card.DRAGON_BLACK).Should().BeFalse();
+            field.CanStackAnythingOn(Card.EMPTY).Should().BeFalse();
+            field.CanStackAnythingOn(new Card(9, SuitEnum.RED)).Should().BeTrue();
+            field.CanStackAnythingOn(new Card(7, SuitEnum.BLACK)).Should().BeFalse();
+
+            field = PlayingFields.A5;
+            field.CanStackAnythingOn(new Card(2, SuitEnum.BLACK)).Should().BeFalse();
+
+            field = PlayingFields.A6;
+            field.CanStackAnythingOn(new Card(5, SuitEnum.RED)).Should().BeTrue();
+        }
     }
 }
