@@ -53,7 +53,6 @@
     <Compile Include="ScreenHandler\Point.cs" />
     <Compile Include="ScreenHandler\Vec2.cs" />
     <Compile Include="Utils\GameStatePrinter.cs" />
-    <Compile Include="Utils\LimitedConcurrencyLevelTaskScheduler.cs" />
     <Compile Include="Actor\Player.cs" />
     <Compile Include="ScreenHandler\ScreenExtractor.cs" />
     <Compile Include="Game\Turn.cs" />

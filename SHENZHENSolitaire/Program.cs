@@ -47,7 +47,7 @@ namespace SHENZENSolitaire
                 }
                 else
                 {
-                    Console.WriteLine("Nichts gefunden!");
+                    Console.WriteLine("No Solution found!");
                 }
 
                 Console.WriteLine("Sleeping 10s...");
