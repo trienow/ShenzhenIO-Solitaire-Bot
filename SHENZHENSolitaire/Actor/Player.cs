@@ -10,6 +10,10 @@ namespace SHENZENSolitaire.Actor
     public class Player
     {
         public PlayingField Field { get; set; }
+
+        /// <summary>
+        /// When trying to move cards around on the field try to move the following cards first
+        /// </summary>
         public static readonly Card[] MOVEMENT_PRIORITY = new Card[]
         {
             new Card(0, SuitEnum.ROSE),
@@ -44,6 +48,7 @@ namespace SHENZENSolitaire.Actor
             Card.DRAGON_GREEN,
             Card.DRAGON_BLACK
         };
+
         private static readonly ParallelOptions PARALLEL_OPTIONS = new ParallelOptions { MaxDegreeOfParallelism = 8 };
 
         public int Tries { get; set; } = 0;
@@ -59,43 +64,42 @@ namespace SHENZENSolitaire.Actor
         {
             List<Turn> turns = new List<Turn>(1);
 
-            //Try move cards from the buffer to the output
-            #region [TO OUTPUT FROM BUFFER]
-            int[] neededOutputCardValue = {
-                field[4].Value + 1, //RED
-                field[5].Value + 1, //BLACK
-                field[6].Value + 1  //GREEN
+            List<Card> neededOutputCards = new List<Card>()
+            {
+                new Card((byte)(field[4].Value + 1), SuitEnum.RED),
+                new Card((byte)(field[5].Value + 1), SuitEnum.BLACK),
+                new Card((byte)(field[6].Value + 1), SuitEnum.GREEN)
             };
 
-            for (byte col = 0; col < PlayingField.COLUMNS_BUFFER; col++)
+            neededOutputCards.Sort();
+
+            foreach (Card neededOutputCard in neededOutputCards)
             {
-                Card c = field[col];
+                #region [TO OUTPUT FROM BUFFER]
+                for (byte col = 0; col < PlayingField.COLUMNS_BUFFER; col++)
+                {
+                    Card c = field[col];
+                    if (c == neededOutputCard)
+                    {
+                        Turn turn = new Turn { FromColumn = col, FromTop = true, ToTop = true };
+                        switch (c.Suit)
+                        {
+                            case SuitEnum.RED: turn.ToColumn = 4; break;
+                            case SuitEnum.BLACK: turn.ToColumn = 5; break;
+                            case SuitEnum.GREEN: turn.ToColumn = 6; break;
+                        }
 
-                if (c.Value == 0) continue;
-                Turn turn = new Turn { FromColumn = col, FromTop = true, ToTop = true };
-                if (c.Suit == SuitEnum.RED && c.Value == neededOutputCardValue[0])
-                {
-                    turn.ToColumn = 4;
+                        if (field.IsTurnAllowed(turn))
+                        {
+                            turns.Add(turn);
+                            break;
+                        }
+                    }
                 }
-                else if (c.Suit == SuitEnum.BLACK && c.Value == neededOutputCardValue[0])
-                {
-                    turn.ToColumn = 5;
-                }
-                else if (c.Suit == SuitEnum.GREEN && c.Value == neededOutputCardValue[0])
-                {
-                    turn.ToColumn = 6;
-                }
+                #endregion
 
-                if (turn.ToColumn > 0 && field.IsTurnAllowed(turn))
-                {
-                    turns.Add(turn);
-                    break;
-                }
-            }
-            #endregion
+                if (turns.Count > 0) break;
 
-            if (turns.Count == 0)
-            {
                 #region [TO OUTPUT FROM FIELD]
                 for (byte col = 0; col < PlayingField.COLUMNS_FIELD; col++)
                 {
@@ -103,7 +107,7 @@ namespace SHENZENSolitaire.Actor
                     if (row == -1) continue; //<- No cards in this stack
 
                     Card c = field[col, row];
-                    if (c.Value > 0 || c.Suit == SuitEnum.ROSE) //<- If it is a card, which can go to the output
+                    if (c == neededOutputCard || c.Suit == SuitEnum.ROSE) //<- If it is a card, which can go to the output
                     {
                         Turn turn = new Turn { FromColumn = col, FromRow = (byte)row, FromTop = false, ToTop = true };
                         switch (c.Suit)
@@ -122,6 +126,8 @@ namespace SHENZENSolitaire.Actor
                     }
                 }
                 #endregion
+
+                if (turns.Count > 0) break;
             }
 
             if (turns.Count == 0)
@@ -377,7 +383,10 @@ namespace SHENZENSolitaire.Actor
                         {
                             lock (this)
                             {
-                                nextStates.Enqueue(newState);
+                                if (remainingCards <= lowestCardCount || stateCount + nextStates.Count < 1048576)
+                                {
+                                    nextStates.Enqueue(newState);
+                                }
 
                                 if (remainingCards < lowestCardCount)
                                 {
@@ -385,10 +394,10 @@ namespace SHENZENSolitaire.Actor
 
                                     if (lowestCardCount < 12)
                                     {
-                                        thresholdNumerator = 131072f;
+                                        thresholdNumerator = ushort.MaxValue;
                                     }
 
-                                    Console.WriteLine($"Cards left to distribute: {lowestCardCount,-2}  Threshold: {lowestCardCount + (int)threshold,-2}  Current States: {stateCount,-5}  Total Tries: {Tries}");
+                                    Console.WriteLine($"Cards left to distribute: {lowestCardCount,-2}  Threshold: {lowestCardCount + (int)threshold,-2}  Current States: {stateCount,-8}  Total Tries: {Tries}");
                                 }
                             }
                         }
@@ -398,8 +407,7 @@ namespace SHENZENSolitaire.Actor
                 states = nextStates;
             }
 
-            states.TrimExcess();
-
+            states = null; //<- Force memory cleanup
             return finalState;
         }
     }
