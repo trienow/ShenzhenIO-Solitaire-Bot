@@ -9,11 +9,12 @@ namespace SHENZENSolitaire.Actor
     public class Player
     {
         public PlayingField Field { get; set; }
+        public int Tries { get; set; } = 0;
 
         /// <summary>
         /// When trying to move cards around on the field try to move the following cards first
         /// </summary>
-        public static readonly Card[] MOVEMENT_PRIORITY = new Card[]
+        private static readonly Card[] MOVEMENT_PRIORITY = new Card[]
         {
             new Card(0, SuitEnum.ROSE),
             new Card(9, SuitEnum.RED),
@@ -50,7 +51,6 @@ namespace SHENZENSolitaire.Actor
 
         private static readonly ParallelOptions PARALLEL_OPTIONS = new ParallelOptions { MaxDegreeOfParallelism = 8 };
 
-        public int Tries { get; set; } = 0;
         //private static readonly LimitedConcurrencyLevelTaskScheduler LIMITED_TASK_SCHED = new LimitedConcurrencyLevelTaskScheduler(8);
         //private static readonly ParallelOptions PARALLEL_OPTIONS = new ParallelOptions { MaxDegreeOfParallelism = 2, TaskScheduler = LIMITED_TASK_SCHED };
 
@@ -350,18 +350,19 @@ namespace SHENZENSolitaire.Actor
             states.Enqueue(new GameState(Field));
             int lowestCardCount = 41;
             GameState finalState = null;
-            float thresholdNumerator = 524288f;
+            float thresholdNumerator = float.MaxValue;
 
             while (states.Count > 0)
             {
                 int stateCount = states.Count + 1;
-                float threshold = Math.Max(Math.Min(thresholdNumerator / stateCount, 20), 2);
+                float threshold = Math.Max(Math.Min(thresholdNumerator / stateCount, 20), 1);
 
                 Queue<GameState> nextStates = new Queue<GameState>(states.Count);
                 Parallel.ForEach(states, PARALLEL_OPTIONS, (currentState, loopState) =>
                 {
-                    if (stateCount > 2097152 && currentState.RemainingCards > lowestCardCount) return; //<- Out of Memory Saver
-                    if (currentState.RemainingCards - threshold > lowestCardCount) return;
+                    int remainingCards = currentState.RemainingCards;
+                    if (stateCount > 2097152 && remainingCards > lowestCardCount) return; //<- Out of Memory Saver
+                    if (remainingCards - threshold > lowestCardCount) return;
 
                     List<Turn> turns = FindTurns(currentState.FieldResult);
                     foreach (Turn turn in turns)
@@ -372,7 +373,7 @@ namespace SHENZENSolitaire.Actor
                         }
 
                         GameState newState = new GameState(currentState, turn);
-                        int remainingCards = newState.PerformTurn();
+                        remainingCards = newState.PerformTurn();
                         if (remainingCards == 0)
                         {
                             finalState = newState;
@@ -391,11 +392,7 @@ namespace SHENZENSolitaire.Actor
                                 if (remainingCards < lowestCardCount)
                                 {
                                     lowestCardCount = remainingCards;
-
-                                    if (lowestCardCount < 12)
-                                    {
-                                        thresholdNumerator = ushort.MaxValue;
-                                    }
+                                    thresholdNumerator = 16384 * lowestCardCount * (lowestCardCount >> 3);
 
                                     Console.WriteLine($"Cards left to distribute: {lowestCardCount,-2}  Threshold: {lowestCardCount + (int)threshold,-2}  Current States: {stateCount,-8}  Total Tries: {Tries}");
                                 }
