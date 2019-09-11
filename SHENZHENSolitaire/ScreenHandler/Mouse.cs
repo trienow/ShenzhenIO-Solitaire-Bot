@@ -45,11 +45,11 @@ namespace SHENZENSolitaire.ScreenHandler
             {
                 Vec2 delta = diff / steps;
 
-                for (int i = 0; i < steps; i++)
+                for (int i = 0; i <= steps; i++)
                 {
-                    currPos += delta;
                     SetCursorPos(currPos.XInt, currPos.YInt);
                     Thread.Sleep(1);
+                    currPos += delta;
                 }
             }
 

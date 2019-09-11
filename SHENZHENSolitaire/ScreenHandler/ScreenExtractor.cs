@@ -99,6 +99,8 @@ namespace SHENZENSolitaire.ScreenHandler
                 coord.Y = YS[row];
             }
 
+            coord += new Vec2(5, 5);
+
             return coord;
         }
     }

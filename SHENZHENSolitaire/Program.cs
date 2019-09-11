@@ -13,7 +13,7 @@ namespace SHENZENSolitaire
         {
             Console.Title = "SHENZHEN IO Bot";
 
-            for (int i = 0; i < 20; i++)
+            for (int i = 0; i < 40; i++)
             {
                 Console.WriteLine();
             }
@@ -50,7 +50,8 @@ namespace SHENZENSolitaire
                     Console.WriteLine("No Solution found!");
                 }
 
-                Console.WriteLine("Sleeping 10s...");
+                Thread.Sleep(1000);
+                Console.Clear();
                 Thread.Sleep(10000);
 
                 GameExecuter.NewGame();
