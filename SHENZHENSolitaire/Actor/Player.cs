@@ -352,17 +352,15 @@ namespace SHENZENSolitaire.Actor
             GameState finalState = null;
             float thresholdNumerator = float.MaxValue;
 
+            int stateCount = states.Count + 1;
+            int maxAllowedCards = int.MaxValue;
             while (states.Count > 0)
             {
-                int stateCount = states.Count + 1;
-                float threshold = Math.Max(Math.Min(thresholdNumerator / stateCount, 20), 1);
-
-                Queue<GameState> nextStates = new Queue<GameState>(states.Count);
+                Queue<GameState> nextStates = new Queue<GameState>(stateCount);
                 Parallel.ForEach(states, PARALLEL_OPTIONS, (currentState, loopState) =>
                 {
                     int remainingCards = currentState.RemainingCards;
-                    if (stateCount > 2097152 && remainingCards > lowestCardCount) return; //<- Out of Memory Saver
-                    if (remainingCards - threshold > lowestCardCount) return;
+                    if (remainingCards >= maxAllowedCards) return;
 
                     List<Turn> turns = FindTurns(currentState.FieldResult);
                     foreach (Turn turn in turns)
@@ -376,32 +374,52 @@ namespace SHENZENSolitaire.Actor
                         remainingCards = newState.PerformTurn();
                         if (remainingCards == 0)
                         {
-                            finalState = newState;
-                            loopState.Break();
-                            break;
+                            lock (this)
+                            {
+                                finalState = newState;
+                                loopState.Break();
+                                break;
+                            }
                         }
                         else if (newState.IsStateUnique())
                         {
                             lock (this)
                             {
-                                if (remainingCards <= lowestCardCount || stateCount + nextStates.Count < 1048576)
-                                {
-                                    nextStates.Enqueue(newState);
-                                }
-
                                 if (remainingCards < lowestCardCount)
                                 {
                                     lowestCardCount = remainingCards;
                                     thresholdNumerator = 16384 * lowestCardCount * (lowestCardCount >> 3);
 
-                                    Console.WriteLine($"Cards left to distribute: {lowestCardCount,-2}  Threshold: {lowestCardCount + (int)threshold,-2}  Current States: {stateCount,-8}  Total Tries: {Tries}");
+                                    nextStates.Enqueue(newState);
+                                }
+                                else if ((stateCount + nextStates.Count) < 1048576)
+                                {
+                                    nextStates.Enqueue(newState);
                                 }
                             }
                         }
                     }
                 });
 
+                if (finalState != null)
+                {
+                    nextStates = new Queue<GameState>(0);
+                }
+                else if (Tries >= 10000000)
+                {
+                    Console.WriteLine($"Giving up after {Tries:N0} tries");
+                    break;
+                }
+
                 states = nextStates;
+                stateCount = states.Count;
+                int newMaxAllowedCards = (int)(lowestCardCount + Math.Max(Math.Min(thresholdNumerator / stateCount, 20), 1));
+                if (newMaxAllowedCards < maxAllowedCards)
+                {
+                    maxAllowedCards = newMaxAllowedCards;
+                }
+
+                Console.WriteLine($"Cards left to distribute: {lowestCardCount,-2}  Threshold: {maxAllowedCards,-2}  Current States: {stateCount,-9:N0}  Total Tries: {Tries:N0}");
             }
 
             return finalState;

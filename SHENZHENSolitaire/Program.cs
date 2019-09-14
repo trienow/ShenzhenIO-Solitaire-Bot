@@ -13,11 +13,6 @@ namespace SHENZENSolitaire
         {
             Console.Title = "SHENZHEN IO Bot";
 
-            for (int i = 0; i < 40; i++)
-            {
-                Console.WriteLine();
-            }
-
             Console.WriteLine("Press ENTER when the field can be extracted!");
             Console.Read();
 
@@ -50,10 +45,10 @@ namespace SHENZENSolitaire
                     Console.WriteLine("No Solution found!");
                 }
 
-                Thread.Sleep(1000);
-                Console.Clear();
-                Thread.Sleep(10000);
+                Console.WriteLine("Sleping for 5sec...");
+                Thread.Sleep(5000);
 
+                GameExecuter.FocusWindow();
                 GameExecuter.NewGame();
             }
         }

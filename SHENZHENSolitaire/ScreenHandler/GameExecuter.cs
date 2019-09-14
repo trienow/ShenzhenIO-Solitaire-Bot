@@ -18,10 +18,12 @@ namespace SHENZENSolitaire.ScreenHandler
                     Vec2 to = ScreenExtractor.TranslateSlotToPos(turn.ToTop, turn.ToColumn, 5, state.MovedCard);
 
                     Mouse.DragFromTo(from.XInt, from.YInt, to.XInt, to.YInt);
+                    Thread.Sleep(500);
                 }
                 else
                 {
                     Console.WriteLine("AUTO");
+                    Thread.Sleep(300);
                 }
             }
             else
@@ -32,9 +34,8 @@ namespace SHENZENSolitaire.ScreenHandler
                     case SuitEnum.GREEN: Mouse.ClickTo(1208, 420); break;
                     case SuitEnum.BLACK: Mouse.ClickTo(1208, 509); break;
                 }
+                Thread.Sleep(300);
             }
-
-            Thread.Sleep(500);
         }
 
         public static void NewGame()
