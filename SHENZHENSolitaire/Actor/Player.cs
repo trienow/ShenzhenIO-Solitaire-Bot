@@ -350,7 +350,6 @@ namespace SHENZENSolitaire.Actor
             states.Enqueue(new GameState(Field));
             int lowestCardCount = 41;
             GameState finalState = null;
-            float thresholdNumerator = float.MaxValue;
 
             int stateCount = states.Count + 1;
             int maxAllowedCards = int.MaxValue;
@@ -374,12 +373,9 @@ namespace SHENZENSolitaire.Actor
                         remainingCards = newState.PerformTurn();
                         if (remainingCards == 0)
                         {
-                            lock (this)
-                            {
-                                finalState = newState;
-                                loopState.Break();
-                                break;
-                            }
+                            finalState = newState;
+                            loopState.Break();
+                            break;
                         }
                         else if (newState.IsStateUnique())
                         {
@@ -388,8 +384,7 @@ namespace SHENZENSolitaire.Actor
                                 if (remainingCards < lowestCardCount)
                                 {
                                     lowestCardCount = remainingCards;
-                                    thresholdNumerator = 16384 * lowestCardCount * (lowestCardCount >> 3);
-
+                                    maxAllowedCards = lowestCardCount + 5;
                                     nextStates.Enqueue(newState);
                                 }
                                 else if ((stateCount + nextStates.Count) < 1048576)
@@ -413,13 +408,8 @@ namespace SHENZENSolitaire.Actor
 
                 states = nextStates;
                 stateCount = states.Count;
-                int newMaxAllowedCards = (int)(lowestCardCount + Math.Max(Math.Min(thresholdNumerator / stateCount, 20), 1));
-                if (newMaxAllowedCards < maxAllowedCards)
-                {
-                    maxAllowedCards = newMaxAllowedCards;
-                }
 
-                Console.WriteLine($"Cards left to distribute: {lowestCardCount,-2}  Threshold: {maxAllowedCards,-2}  Current States: {stateCount,-9:N0}  Total Tries: {Tries:N0}");
+                Console.WriteLine($"Cards left to distribute: {lowestCardCount,-2}  Current States: {stateCount,-9:N0}  Total Tries: {Tries:N0}");
             }
 
             return finalState;

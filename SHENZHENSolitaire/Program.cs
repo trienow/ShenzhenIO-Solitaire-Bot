@@ -45,8 +45,8 @@ namespace SHENZENSolitaire
                     Console.WriteLine("No Solution found!");
                 }
 
-                Console.WriteLine("Sleping for 5sec...");
-                Thread.Sleep(5000);
+                Console.WriteLine("Sleping for 10sec...");
+                Thread.Sleep(10000);
 
                 GameExecuter.FocusWindow();
                 GameExecuter.NewGame();
