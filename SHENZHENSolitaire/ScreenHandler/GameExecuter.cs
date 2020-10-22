@@ -30,9 +30,9 @@ namespace SHENZENSolitaire.ScreenHandler
             {
                 switch (turn.MergeDragons)
                 {
-                    case SuitEnum.RED: Mouse.ClickTo(1208, 337); break;
-                    case SuitEnum.GREEN: Mouse.ClickTo(1208, 420); break;
-                    case SuitEnum.BLACK: Mouse.ClickTo(1208, 509); break;
+                    case SuitEnum.RED: Mouse.ClickTo(ScreenCoordinates.XDragon, ScreenCoordinates.YDragonRed); break;
+                    case SuitEnum.GREEN: Mouse.ClickTo(ScreenCoordinates.XDragon, ScreenCoordinates.YDragonGreen); break;
+                    case SuitEnum.BLACK: Mouse.ClickTo(ScreenCoordinates.XDragon, ScreenCoordinates.YDragonBlack); break;
                 }
                 Thread.Sleep(300);
             }
@@ -40,12 +40,12 @@ namespace SHENZENSolitaire.ScreenHandler
 
         public static void NewGame()
         {
-            Mouse.ClickTo(1759, 1113);
+            Mouse.ClickTo(ScreenCoordinates.XNewGame, ScreenCoordinates.YNewGame);
             Thread.Sleep(7000);
         }
         public static void FocusWindow()
         {
-            Mouse.ClickTo(1245, 383);
+            Mouse.ClickTo(ScreenCoordinates.XNothing, ScreenCoordinates.YNothing);
         }
     }
 }

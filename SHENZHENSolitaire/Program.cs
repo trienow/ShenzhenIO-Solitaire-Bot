@@ -11,6 +11,10 @@ namespace SHENZENSolitaire
     {
         static void Main()
         {
+            //==============================================
+            ScreenCoordinates.SetScreenSize(2560, 1440);
+            //==============================================
+
             Console.Title = "SHENZHEN IO Bot";
 
             Console.WriteLine("Press ENTER when the field can be extracted!");
